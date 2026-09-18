@@ -380,7 +380,7 @@
 <div id="app"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQmrrzIi5IO22jo6Srw5_5JsR1jHIiM-BU_-QpLI2YjVyG1a1h4zsK1X5l1uirxe7x/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQmrrzIi5IO22jo6Srw5_5JsR1jHIiM-BU_-QpLI2YjVyG1a1h4zsK1X5l1uirxe7x/exec ';
 // Collez ici votre token public Mapbox (Compte Mapbox > Tokens)
 const MAPBOX_TOKEN = 'pk.eyJ1IjoibmJheWE4OCIsImEiOiJjbXU0MTV2YnMwZjY1MnpzN2gzajVmZzR6In0.0tWKbKLi6SCdi0zb6RzKYQ';
 const DRIVER_WHATSAPP = '33695567192';
@@ -642,8 +642,8 @@ function postToSheet(payload){
   }).catch(()=>{});
 }
 
-async function loadBookings(){
-  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ state.bookings = []; render(); return; }
+async function loadBookings(silent){
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ state.bookings = []; if(!silent) render(); return; }
   try{
     const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
     state.bookings = (rows || []).map(r => ({
@@ -652,7 +652,10 @@ async function loadBookings(){
       price: r.price, createdAt: r.createdAt
     }));
   }catch(e){ state.bookings = []; }
-  render();
+  // Ne jamais reconstruire la page pendant que le client remplit le formulaire (étape 2) :
+  // ça effacerait tout ce qu'il vient de taper.
+  const isFillingForm = state.bookingOpen && state.bookingStep === 2;
+  if(!silent && !isFillingForm) render();
 }
 setInterval(() => { if(!APPS_SCRIPT_URL.includes('COLLEZ_ICI')) loadBookings(); }, 20000);
 

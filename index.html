@@ -142,25 +142,20 @@
 
   /* BENTO — grille des points forts, cartes néo-brutalistes */
   .bento{
-    display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:auto auto;gap:14px;
-    margin:0 auto;max-width:540px;padding:30px 20px 0;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+    margin:0 auto;max-width:540px;padding:26px 20px 0;
   }
   .bento-card{
-    background:var(--white);border:2.5px solid var(--ink);border-radius:var(--radius-lg);
-    padding:20px;position:relative;overflow:hidden;box-shadow:5px 5px 0 var(--ink);
+    background:var(--white);border:2px solid var(--ink);border-radius:var(--radius-lg);
+    padding:16px 10px;position:relative;overflow:hidden;box-shadow:4px 4px 0 var(--ink);
+    text-align:center;
   }
-  .bento-card.lg{grid-row:span 2;display:flex;flex-direction:column;justify-content:space-between;background:var(--ink);}
-  .bento-card.lg .bento-title{color:var(--white);}
-  .bento-card.lg .bento-text{color:rgba(255,255,255,0.65);}
-  .bento-card.lg svg{color:var(--gold);}
-  .bento-card svg{width:26px;height:26px;color:var(--ink);margin-bottom:14px;}
-  .bento-title{font-family:'Space Grotesk';font-weight:700;font-size:17px;margin-bottom:4px;text-transform:uppercase;}
-  .bento-text{font-size:12.5px;color:var(--ink-dim);line-height:1.5;}
-  .bento-card.lg .bento-text{color:rgba(255,255,255,0.6);}
+  .bento-emoji{font-size:26px;line-height:1;margin-bottom:10px;display:block;}
+  .bento-title{font-family:'Space Grotesk';font-weight:700;font-size:13px;margin-bottom:4px;text-transform:uppercase;letter-spacing:-.01em;}
+  .bento-text{font-size:11px;color:var(--ink-dim);line-height:1.4;}
   .bento-tag{
-    display:inline-block;margin-top:14px;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
-    color:var(--ink);background:var(--gold);border-radius:3px;padding:4px 10px;font-weight:800;
-    width:fit-content;
+    display:inline-block;margin-top:10px;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--ink);background:var(--gold);border-radius:3px;padding:3px 8px;font-weight:800;
   }
 
   /* Reveal au scroll */
@@ -331,6 +326,43 @@
   }
   .confirm-icon svg{width:26px;height:26px;color:#fff;}
 
+  /* SUIVI DE COURSE — carte, fiche chauffeur, notation */
+  .track-summary{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .track-summary .badge{
+    background:var(--gold);color:var(--ink);font-size:10.5px;font-weight:800;text-transform:uppercase;
+    padding:4px 9px;border-radius:3px;border:2px solid var(--ink);white-space:nowrap;
+  }
+  .track-map{
+    width:100%;height:260px;border-radius:var(--radius-lg);border:2.5px solid var(--ink);
+    box-shadow:5px 5px 0 var(--ink);margin-top:16px;overflow:hidden;background:var(--cream-2);
+  }
+  .track-live-stats{
+    display:flex;gap:10px;margin-top:14px;
+  }
+  .track-live-stats .stat{
+    flex:1;background:var(--ink);color:var(--gold);border-radius:var(--radius-md);padding:12px;text-align:center;
+  }
+  .track-live-stats .stat .num{font-family:'Space Grotesk';font-weight:700;font-size:20px;}
+  .track-live-stats .stat .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,0.6);margin-top:2px;}
+  .track-waiting{
+    text-align:center;padding:20px 10px;color:var(--ink-dim);font-size:13px;line-height:1.6;
+  }
+
+  .driver-card{display:flex;align-items:center;gap:14px;}
+  .driver-photo, .vehicle-photo{
+    width:56px;height:56px;border-radius:50%;border:2.5px solid var(--ink);object-fit:cover;
+    background:var(--cream-2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;
+  }
+  .vehicle-photo{border-radius:var(--radius-md);}
+  .driver-card .info{flex:1;}
+  .driver-card .name{font-family:'Space Grotesk';font-weight:700;font-size:15px;text-transform:uppercase;}
+  .driver-card .sub{font-size:11.5px;color:var(--ink-dim);}
+
+  .star-rating{display:flex;gap:6px;justify-content:center;margin:16px 0 6px;}
+  .star-rating .star{font-size:34px;cursor:pointer;color:var(--cream-2);transition:transform .1s;-webkit-text-stroke:2px var(--ink);}
+  .star-rating .star.filled{color:var(--gold);}
+  .star-rating .star:active{transform:scale(1.15);}
+
   /* BOTTOM ACTION BAR */
   .bottom-spacer{height:0;transition:height .3s ease;}
   .bottom-spacer.show{height:92px;}
@@ -350,9 +382,9 @@
     .hero-inner{padding:48px 16px 30px;}
     .hero h1{font-size:26px;}
     .container{padding:0 14px 40px;}
-    .bento{padding:22px 14px 0;gap:10px;grid-template-columns:1fr;}
-    .bento-card.lg{grid-row:auto;}
-    .bento-card{padding:16px;}
+    .bento{padding:22px 14px 0;gap:6px;}
+    .bento-card{padding:12px 6px;}
+    .bento-emoji{font-size:22px;}
     .card{padding:18px;}
     .row2{grid-template-columns:1fr;}
     .cal-day{font-size:12px;}
@@ -377,19 +409,27 @@
 </head>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
 <div id="app"></div>
-  
+
 <script>
-const APPS_SCRIPT_URL ='https://script.google.com/macros/s/AKfycbyFYAYILzBk8drpxMnNkk5-Kow46tER_EVRkoQfhko7sPZ-x9tjBpBc4QcqF1z8p6fZ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxH5HaUScvNH_1gwTk8Ol4gLKTnIA_RjzGMYh2FKLhEoR3I1y-YTZkwEvg-5YoEatDk/exec';
 // Collez ici votre token public Mapbox (Compte Mapbox > Tokens)
 const MAPBOX_TOKEN = 'pk.eyJ1IjoibmJheWE4OCIsImEiOiJjbXU0MTV2YnMwZjY1MnpzN2gzajVmZzR6In0.0tWKbKLi6SCdi0zb6RzKYQ';
 const DRIVER_WHATSAPP = '33695567192';
+// Collez ici l'URL d'une photo de vous et de votre véhicule (hébergées n'importe où : Google Drive en partage public, Imgur, etc.)
+// Laissez tel quel si vous n'en avez pas encore : une icône par défaut s'affichera.
+const DRIVER_PHOTO_URL = 'https://commons.wikimedia.org/wiki/File:2023_Suzuki_Swace_1X7A7186.jpg#/media/Fichier:2023_Suzuki_Swace_1X7A7186.jpg';
+const VEHICLE_PHOTO_URL = 'https://www.magnific.com/fr/psd-gratuit/illustration-3d-personne-lunettes-soleil_27470334.htm#fromView=keyword&page=1&position=0&uuid=5d31fd74-b651-4f84-9245-f7cbb482bc0d&track=ais_hybrid&query=Man+emoji';
+const DRIVER_DISPLAY_NAME = 'Votre chauffeur';
+const DRIVER_USERNAME = 'admin';
 const DRIVER_PASSWORD = 'vtc2026';
 
 const MONTHS = {
   fr: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
   en: ['January','February','March','April','May','June','July','August','September','October','November','December']
-};    
+};
 const DOW = {
   fr: ['Lu','Ma','Me','Je','Ve','Sa','Di'],
   en: ['Mo','Tu','We','Th','Fr','Sa','Su']
@@ -402,17 +442,37 @@ const I18N = {
     heroTitle: 'Un chauffeur privé,<br>à <em>votre</em> rythme.',
     tagline: 'Trajets, transferts aéroport et déplacements professionnels à Paris et en Île-de-France — réservez en quelques secondes, confirmez sur WhatsApp.',
     ctaBtn: 'Réserver un trajet ↓',
+    trackBtn: '🔍 Suivre ma course',
+    trackTitle: 'Suivre ma course',
+    trackIntro: 'Entrez le numéro de réservation indiqué sur votre bon de commande pour retrouver le statut de votre course.',
+    trackRefLabel: 'Numéro de réservation',
+    trackRefPlaceholder: 'ex : mfj2k9ab',
+    trackSearchBtn: 'Rechercher',
+    trackSearching: 'Recherche en cours…',
+    trackNoResults: 'Aucune réservation trouvée avec ce numéro.',
+    trackResultsTitle: 'Vos réservations',
+    trackNotConfigured: "Le suivi n'est pas encore activé sur ce site.",
+    trackStatusUpcoming: 'À venir',
+    trackStatusDone: 'Terminée',
+    trackKmLeft: 'km restants',
+    trackMinLeft: 'min restantes',
+    trackWaitingLive: 'Le chauffeur partagera sa position environ 1h avant votre prise en charge. Revenez sur cette page à ce moment-là pour le suivre en direct.',
+    trackDriverSub: 'Votre chauffeur pour ce trajet',
+    trackRateTitle: "Comment s'est passée votre course ?",
+    trackRateSubmit: 'Envoyer ma note',
+    trackRateThanks: 'Merci pour votre retour !',
+    trackMapLoading: 'Chargement de la carte…',
     feature1: 'Disponible<br>24h/24 · 7j/7',
     feature2: 'Île-de-France<br>toutes zones',
     feature3: 'Paiement<br>simplifié',
     marqueeItems: ['Paris · Île-de-France', 'Disponible 24h/24, 7j/7', 'Paiement simplifié', 'Réservation en 1 minute', 'Confirmation sur WhatsApp'],
-    bentoBigTitle: 'Toujours disponible',
-    bentoBigText: 'Un chauffeur reste joignable à toute heure, de jour comme de nuit, pour vos trajets imprévus ou planifiés.',
-    bentoBigTag: '24h/24 · 7j/7',
-    bentoCard2Title: 'Toute l\'Île-de-France',
-    bentoCard2Text: 'Paris et ses environs, gares, aéroports — un seul chauffeur pour tous vos déplacements.',
-    bentoCard3Title: 'Paiement simplifié',
-    bentoCard3Text: 'Réservation confirmée sur WhatsApp, règlement facilité par carte.',
+    bentoBigTitle: 'Aéroports & Gares',
+    bentoBigText: 'Prise en charge à Orly, Roissy CDG, Gare de Lyon, Gare du Nord et toutes les gares d\'Île-de-France.',
+    bentoBigTag: 'Transferts',
+    bentoCard2Title: 'Disponible 24/7',
+    bentoCard2Text: 'Un chauffeur joignable à toute heure, jour et nuit.',
+    bentoCard3Title: 'Paiement CB & Espèces',
+    bentoCard3Text: 'Carte bancaire ou espèces, comme vous préférez.',
     reservationTitle: 'Réservation',
     stepLabels: ['Date','Détails','Confirmation'],
     chooseDate: 'Choisissez une date',
@@ -478,15 +538,23 @@ const I18N = {
     newBooking: 'Faire une nouvelle réservation',
     backHome: "Retour à l'accueil",
     footerNote: 'Estimation de tarif indicative, non contractuelle. Le prix définitif est confirmé par le chauffeur.',
+    driverAccessLink: 'Accès professionnel',
     fillAlert: "Merci de remplir l'heure, le téléphone, le départ et l'arrivée.",
     back: '← Retour',
     backClient: '← Retour client',
     driverAccessTitle: 'Accès chauffeur',
+    usernameLabel: 'Identifiant',
+    usernamePlaceholder: 'admin',
     pwLabel: 'Mot de passe',
     pwPlaceholder: '••••••••',
     accessCalendar: 'Accéder au calendrier',
     wrongPw: 'Mot de passe incorrect.',
     driverView: 'Vue chauffeur',
+    sharePositionTitle: 'Position en direct',
+    sharePositionHint: "Activez avant de prendre la route pour que le client puisse suivre votre approche sur la carte. Gardez cette page ouverte pendant le trajet.",
+    shareStart: '📍 Démarrer le partage',
+    shareStop: '⏹ Arrêter le partage',
+    shareActiveNote: 'Position partagée en direct…',
     myCalendar: 'Mon calendrier',
     seeAll: 'Voir toutes les réservations',
     reservationsOn: 'Réservations du',
@@ -506,17 +574,37 @@ const I18N = {
     heroTitle: 'A private driver,<br>on <em>your</em> schedule.',
     tagline: 'Rides, airport transfers and business travel in Paris and the Île-de-France region — book in seconds, confirm on WhatsApp.',
     ctaBtn: 'Book a ride ↓',
+    trackBtn: '🔍 Track my ride',
+    trackTitle: 'Track my ride',
+    trackIntro: 'Enter the booking reference shown on your order confirmation to find its status.',
+    trackRefLabel: 'Booking reference',
+    trackRefPlaceholder: 'e.g. mfj2k9ab',
+    trackSearchBtn: 'Search',
+    trackSearching: 'Searching…',
+    trackNoResults: 'No booking found with this number.',
+    trackResultsTitle: 'Your bookings',
+    trackNotConfigured: "Tracking isn't enabled on this site yet.",
+    trackStatusUpcoming: 'Upcoming',
+    trackStatusDone: 'Completed',
+    trackKmLeft: 'km left',
+    trackMinLeft: 'min left',
+    trackWaitingLive: 'Your driver will share their position about 1 hour before pickup. Come back to this page then to track live.',
+    trackDriverSub: 'Your driver for this ride',
+    trackRateTitle: 'How was your ride?',
+    trackRateSubmit: 'Submit rating',
+    trackRateThanks: 'Thanks for your feedback!',
+    trackMapLoading: 'Loading map…',
     feature1: 'Available<br>24/7',
     feature2: 'Île-de-France<br>all areas',
     feature3: 'Easy<br>payment',
     marqueeItems: ['Paris · Île-de-France', 'Available 24/7', 'Easy payment', 'Book in under a minute', 'Confirmation on WhatsApp'],
-    bentoBigTitle: 'Always available',
-    bentoBigText: 'A driver stays reachable at any hour, day or night, for planned trips or last-minute rides.',
-    bentoBigTag: '24/7',
-    bentoCard2Title: 'All of Île-de-France',
-    bentoCard2Text: 'Paris and its surroundings, stations, airports — one driver for every trip.',
-    bentoCard3Title: 'Easy payment',
-    bentoCard3Text: 'Booking confirmed on WhatsApp, card payment made simple.',
+    bentoBigTitle: 'Airports & Stations',
+    bentoBigText: 'Pickup at Orly, Roissy CDG, Gare de Lyon, Gare du Nord and every station in Île-de-France.',
+    bentoBigTag: 'Transfers',
+    bentoCard2Title: 'Available 24/7',
+    bentoCard2Text: 'A driver reachable at any hour, day or night.',
+    bentoCard3Title: 'Card & Cash Payment',
+    bentoCard3Text: 'Pay by card or cash, whichever you prefer.',
     reservationTitle: 'Booking',
     stepLabels: ['Date','Details','Confirmation'],
     chooseDate: 'Choose a date',
@@ -582,15 +670,23 @@ const I18N = {
     newBooking: 'Make another booking',
     backHome: 'Back to home',
     footerNote: 'Estimated fare only, not contractual. Final price confirmed by the driver.',
+    driverAccessLink: 'Professional access',
     fillAlert: 'Please fill in the time, phone number, pickup and drop-off address.',
     back: '← Back',
     backClient: '← Back to site',
     driverAccessTitle: 'Driver access',
+    usernameLabel: 'Username',
+    usernamePlaceholder: 'admin',
     pwLabel: 'Password',
     pwPlaceholder: '••••••••',
     accessCalendar: 'View calendar',
     wrongPw: 'Incorrect password.',
     driverView: 'Driver view',
+    sharePositionTitle: 'Live position',
+    sharePositionHint: 'Turn on before you head out so the client can watch you approach on the map. Keep this page open during the ride.',
+    shareStart: '📍 Start sharing',
+    shareStop: '⏹ Stop sharing',
+    shareActiveNote: 'Sharing live position…',
     myCalendar: 'My calendar',
     seeAll: 'View all bookings',
     reservationsOn: 'Bookings for',
@@ -610,6 +706,9 @@ let state = {
   view: 'client',
   lang: 'fr',
   bookingOpen: false,
+  sharingPosition: false,
+  geoWatchId: null,
+  trackResults: null,
   bookingStep: 1,
   cursorDate: new Date(),
   selectedDate: null,
@@ -823,6 +922,25 @@ async function calculateRoute(departAddress, arriveeAddress){
   };
 }
 
+function fetchDriverPosition(){
+  return fetchViaJsonp(`${APPS_SCRIPT_URL}?type=position`);
+}
+
+// Trajet complet avec géométrie (pour tracer la ligne sur la carte) entre deux coordonnées [lon,lat]
+async function routeBetweenCoords(fromCoord, toCoord){
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${fromCoord[0]},${fromCoord[1]};${toCoord[0]},${toCoord[1]}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('directions failed');
+  const data = await res.json();
+  if(!data.routes || !data.routes.length) throw new Error('no route');
+  const route = data.routes[0];
+  return {
+    km: (route.distance / 1000).toFixed(1),
+    min: Math.round(route.duration / 60),
+    geometry: route.geometry
+  };
+}
+
 function buildReceiptDoc(booking){
   const T = I18N[state.lang];
   const { jsPDF } = window.jspdf;
@@ -939,6 +1057,7 @@ function renderHero(){
       <h1>${titleLines}</h1>
       <div class="tagline">${t('tagline')}</div>
       <button class="cta-btn" id="ctaScroll">${t('ctaBtn')}</button>
+      <button class="link-btn" id="trackOpenBtn" style="color:rgba(255,255,255,0.75);text-decoration:underline;">${t('trackBtn')}</button>
     </div>
     <div class="photo-credit">${t('photoCredit')}</div>
   </section>
@@ -948,21 +1067,19 @@ function renderHero(){
   </div>
 
   <div class="bento">
-    <div class="bento-card lg reveal">
-      <div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-        <div class="bento-title">${t('bentoBigTitle')}</div>
-        <div class="bento-text">${t('bentoBigText')}</div>
-      </div>
+    <div class="bento-card reveal">
+      <span class="bento-emoji">✈️🚄</span>
+      <div class="bento-title">${t('bentoBigTitle')}</div>
+      <div class="bento-text">${t('bentoBigText')}</div>
       <div class="bento-tag">${t('bentoBigTag')}</div>
     </div>
     <div class="bento-card reveal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <span class="bento-emoji">🕐</span>
       <div class="bento-title">${t('bentoCard2Title')}</div>
       <div class="bento-text">${t('bentoCard2Text')}</div>
     </div>
     <div class="bento-card reveal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="5" width="19" height="14" rx="2"/><line x1="2.5" y1="10" x2="21.5" y2="10"/></svg>
+      <span class="bento-emoji">💳💶</span>
       <div class="bento-title">${t('bentoCard3Title')}</div>
       <div class="bento-text">${t('bentoCard3Text')}</div>
     </div>
@@ -1015,6 +1132,8 @@ function renderClient(){
   setupRevealObserver();
   const openBooking = () => { state.bookingOpen = true; state.bookingStep = 1; render(); };
   document.getElementById('ctaScroll').onclick = openBooking;
+  document.getElementById('trackOpenBtn').onclick = () => { state.view = 'track'; state.trackResults = null; render(); };
+  document.getElementById('footerDriverLink').onclick = (e) => { e.preventDefault(); state.view = 'driver-login'; render(); };
   document.getElementById('topbarReserve').onclick = openBooking;
 
   if(state.bookingOpen){
@@ -1025,6 +1144,9 @@ function renderClient(){
 function renderFooterSection(){
   return `<div class="container" style="padding-top:0;">
     <div class="footer-note" style="margin-top:30px;">${t('footerNote')}</div>
+    <div style="text-align:center;margin-top:16px;">
+      <a href="#" id="footerDriverLink" style="font-size:9.5px;color:var(--ink-dim);opacity:.5;text-decoration:none;letter-spacing:.02em;">${t('driverAccessLink')}</a>
+    </div>
   </div>`;
 }
 
@@ -1274,6 +1396,214 @@ function renderBookingOverlay(){
 }
 
 
+let trackRefreshInterval = null;
+let trackMapInstance = null;
+
+function stopTrackRefresh(){
+  if(trackRefreshInterval){ clearInterval(trackRefreshInterval); trackRefreshInterval = null; }
+  trackMapInstance = null;
+}
+
+function isBookingPast(b){
+  try{
+    const dt = new Date(`${b.date}T${(b.time||'00:00')}:00`);
+    return dt.getTime() < Date.now();
+  }catch(e){ return false; }
+}
+
+function driverPhotoHTML(){
+  return DRIVER_PHOTO_URL
+    ? `<img class="driver-photo" src="${DRIVER_PHOTO_URL}" alt="${DRIVER_DISPLAY_NAME}">`
+    : `<div class="driver-photo">🧑‍✈️</div>`;
+}
+function vehiclePhotoHTML(){
+  return VEHICLE_PHOTO_URL
+    ? `<img class="vehicle-photo" src="${VEHICLE_PHOTO_URL}" alt="Véhicule">`
+    : `<div class="vehicle-photo">🚘</div>`;
+}
+
+async function refreshLiveTracking(booking){
+  const statEl = document.getElementById('trackStats');
+  try{
+    const pos = await fetchDriverPosition();
+    if(!pos){ return; }
+    const ageMin = (Date.now() - new Date(pos.updatedAt).getTime()) / 60000;
+    if(ageMin > 30) return; // position trop ancienne, on ne l'affiche pas comme "en direct"
+
+    const pickupCoord = await geocodeAddress(booking.depart);
+    const driverCoord = [pos.lng, pos.lat];
+    const route = await routeBetweenCoords(driverCoord, pickupCoord);
+
+    if(statEl){
+      statEl.innerHTML = `
+        <div class="stat"><div class="num">${route.km}</div><div class="lbl">${t('trackKmLeft')}</div></div>
+        <div class="stat"><div class="num">${route.min}</div><div class="lbl">${t('trackMinLeft')}</div></div>
+      `;
+    }
+
+    if(!trackMapInstance){
+      trackMapInstance = new mapboxgl.Map({
+        container: 'trackMap',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        accessToken: MAPBOX_TOKEN,
+        center: driverCoord,
+        zoom: 12
+      });
+      trackMapInstance.on('load', () => {
+        trackMapInstance.addSource('route', { type: 'geojson', data: { type:'Feature', geometry: route.geometry } });
+        trackMapInstance.addLayer({ id:'route', type:'line', source:'route',
+          paint: { 'line-color': '#F5C518', 'line-width': 5, 'line-opacity': 0.9 } });
+        new mapboxgl.Marker({ color:'#0B0B0C' }).setLngLat(pickupCoord).addTo(trackMapInstance);
+        trackMapInstance.driverMarker = new mapboxgl.Marker({ color:'#F5C518' }).setLngLat(driverCoord).addTo(trackMapInstance);
+        const bounds = new mapboxgl.LngLatBounds(driverCoord, driverCoord).extend(pickupCoord);
+        trackMapInstance.fitBounds(bounds, { padding: 50 });
+      });
+    } else {
+      trackMapInstance.driverMarker.setLngLat(driverCoord);
+      if(trackMapInstance.getSource('route')){
+        trackMapInstance.getSource('route').setData({ type:'Feature', geometry: route.geometry });
+      }
+    }
+  }catch(e){ /* pas de position disponible pour le moment */ }
+}
+
+function renderStars(container, currentValue){
+  container.innerHTML = [1,2,3,4,5].map(n =>
+    `<span class="star ${n <= currentValue ? 'filled' : ''}" data-val="${n}">★</span>`
+  ).join('');
+}
+
+function renderTrack(){
+  const app = document.getElementById('app');
+  const results = state.trackResults;
+  const booking = (results && results.length) ? results[0] : null;
+  const past = booking ? isBookingPast(booking) : false;
+
+  app.innerHTML = `
+    <div class="container" style="padding-top:28px;">
+      <div class="toprow" style="padding-top:0;">
+        <h2>${t('trackTitle')}</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${renderLangSwitch()}
+          <button class="ghost-btn" id="back">${t('back')}</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:18px;">
+        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('trackIntro')}</div>
+        <label>${t('trackRefLabel')}</label>
+        <div class="field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+          <input type="text" id="trackRef" placeholder="${t('trackRefPlaceholder')}" autocapitalize="none" value="${booking ? booking.id : ''}">
+        </div>
+        <button class="primary-btn" id="trackSearchBtn">${t('trackSearchBtn')}</button>
+        <div id="trackStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
+      </div>
+
+      ${results && !booking ? `<div class="card" style="margin-top:16px;"><div class="empty-state">${t('trackNoResults')}</div></div>` : ''}
+
+      ${booking ? `
+      <div class="card" style="margin-top:16px;">
+        <div class="track-summary">
+          <div>
+            <div style="font-family:'Space Grotesk';font-weight:700;font-size:16px;">${booking.date} — ${booking.time}</div>
+            <div style="color:var(--ink-dim);font-size:12.5px;margin-top:4px;">
+              ${t('from')} : ${booking.depart}<br>${t('to')} : ${booking.arrivee}
+            </div>
+          </div>
+          <span class="badge">${past ? t('trackStatusDone') : t('trackStatusUpcoming')}</span>
+        </div>
+
+        <div style="margin-top:16px;" class="driver-card">
+          ${driverPhotoHTML()}
+          ${vehiclePhotoHTML()}
+          <div class="info">
+            <div class="name">${DRIVER_DISPLAY_NAME}</div>
+            <div class="sub">${t('trackDriverSub')}</div>
+          </div>
+        </div>
+
+        ${!past ? `
+          <div id="trackMap" class="track-map"></div>
+          <div class="track-live-stats" id="trackStats"></div>
+          <div id="trackWaitingMsg" class="track-waiting">${t('trackWaitingLive')}</div>
+        ` : ''}
+
+        ${past ? `
+          <div class="roadline" style="margin:22px 0 6px;"></div>
+          ${booking.rating ? `
+            <div style="text-align:center;">
+              <div class="star-rating">${[1,2,3,4,5].map(n=>`<span class="star ${n<=booking.rating?'filled':''}">★</span>`).join('')}</div>
+              <div style="font-size:12.5px;color:var(--ink-dim);">${t('trackRateThanks')}</div>
+            </div>
+          ` : `
+            <div style="text-align:center;font-family:'Space Grotesk';font-weight:700;font-size:14px;text-transform:uppercase;">${t('trackRateTitle')}</div>
+            <div class="star-rating" id="starRating"></div>
+            <button class="primary-btn" id="submitRatingBtn" disabled>${t('trackRateSubmit')}</button>
+            <div id="rateStatus" style="text-align:center;font-size:12px;color:var(--ink-dim);margin-top:8px;"></div>
+          `}
+        ` : ''}
+      </div>` : ''}
+    </div>
+  `;
+  bindLangSwitch();
+  stopTrackRefresh();
+
+  document.getElementById('back').onclick = () => {
+    stopTrackRefresh();
+    history.replaceState(null, '', window.location.pathname);
+    state.view = 'client'; state.trackResults = null; render();
+  };
+
+  document.getElementById('trackSearchBtn').onclick = async () => {
+    const ref = document.getElementById('trackRef').value.trim();
+    const statusEl = document.getElementById('trackStatus');
+    if(!ref) return;
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('trackNotConfigured'); return; }
+    statusEl.textContent = t('trackSearching');
+    try{
+      const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
+      const normalize = s => (s || '').toString().trim().toLowerCase();
+      const matches = (rows || []).filter(r => normalize(r.id) === normalize(ref));
+      state.trackResults = matches.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+      statusEl.textContent = '';
+      render();
+    }catch(e){
+      statusEl.textContent = t('trackNoResults');
+    }
+  };
+
+  if(booking && !past){
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+      const waitEl = document.getElementById('trackWaitingMsg');
+      if(waitEl) waitEl.textContent = t('trackNotConfigured');
+    } else {
+      refreshLiveTracking(booking);
+      trackRefreshInterval = setInterval(() => refreshLiveTracking(booking), 15000);
+    }
+  }
+
+  if(booking && past && !booking.rating){
+    let selected = 0;
+    const starEl = document.getElementById('starRating');
+    renderStars(starEl, 0);
+    starEl.querySelectorAll('.star').forEach(star => {
+      star.onclick = () => {
+        selected = parseInt(star.dataset.val);
+        renderStars(starEl, selected);
+        starEl.querySelectorAll('.star').forEach(s => { s.onclick = star.onclick; });
+        document.getElementById('submitRatingBtn').disabled = false;
+      };
+    });
+    document.getElementById('submitRatingBtn').onclick = async () => {
+      const rateStatus = document.getElementById('rateStatus');
+      if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ rateStatus.textContent = t('trackNotConfigured'); return; }
+      await postToSheet({ action: 'rate', id: booking.id, rating: selected });
+      booking.rating = selected;
+      render();
+    };
+  }
+}
+
 function renderDriverLogin(){
   const app = document.getElementById('app');
   app.innerHTML = `
@@ -1286,6 +1616,8 @@ function renderDriverLogin(){
         </div>
       </div>
       <div class="card" style="margin-top:18px;">
+        <label>${t('usernameLabel')}</label>
+        <input type="text" id="username" placeholder="${t('usernamePlaceholder')}" autocapitalize="none">
         <label>${t('pwLabel')}</label>
         <input type="password" id="pw" placeholder="${t('pwPlaceholder')}">
         <button class="primary-btn" id="loginBtn">${t('accessCalendar')}</button>
@@ -1296,7 +1628,8 @@ function renderDriverLogin(){
   bindLangSwitch();
   document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.view='client'; render(); };
   document.getElementById('loginBtn').onclick = () => {
-    if(document.getElementById('pw').value === DRIVER_PASSWORD){ state.view = 'driver'; render(); }
+    const username = document.getElementById('username').value.trim();
+    if(username === DRIVER_USERNAME && document.getElementById('pw').value === DRIVER_PASSWORD){ state.view = 'driver'; render(); }
     else{ document.getElementById('pwError').style.display = 'block'; }
   };
 }
@@ -1320,6 +1653,13 @@ function renderDriver(){
       </div>
 
       <div class="card" style="margin-top:18px;">
+        <div class="section-title" style="margin-bottom:6px;">${t('sharePositionTitle')}</div>
+        <div style="color:var(--ink-dim);font-size:12.5px;margin-bottom:12px;">${t('sharePositionHint')}</div>
+        <button class="primary-btn" id="shareToggleBtn" style="margin-top:0;">${t('shareStart')}</button>
+        <div id="shareStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
         <div id="calendar"></div>
         ${selected ? `<button class="ghost-btn" id="clearSel" style="margin-top:14px;">${t('seeAll')}</button>` : ''}
       </div>
@@ -1330,6 +1670,7 @@ function renderDriver(){
           <div class="booking-row">
             <div class="top"><span>${b.date} — ${b.time}</span><span>${b.price ? b.price+' €' : ''}</span></div>
             <div class="detail">
+              🎫 ${b.id}<br>
               📞 ${b.phone}<br>
               ${t('from')} : ${b.depart}<br>
               ${t('to')} : ${b.arrivee}
@@ -1346,6 +1687,41 @@ function renderDriver(){
   document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.view='client'; state.selectedDate=null; state.bookingStep=1; render(); };
   const clearBtn = document.getElementById('clearSel');
   if(clearBtn) clearBtn.onclick = () => { state.selectedDate = null; render(); };
+
+  const shareBtn = document.getElementById('shareToggleBtn');
+  const shareStatus = document.getElementById('shareStatus');
+  const updateShareBtn = () => {
+    shareBtn.textContent = state.sharingPosition ? t('shareStop') : t('shareStart');
+  };
+  updateShareBtn();
+  if(state.sharingPosition) shareStatus.textContent = t('shareActiveNote');
+
+  shareBtn.onclick = () => {
+    if(state.sharingPosition){
+      if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
+      state.sharingPosition = false;
+      shareStatus.textContent = '';
+      updateShareBtn();
+      return;
+    }
+    if(!navigator.geolocation){ shareStatus.textContent = t('locationDenied'); return; }
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ shareStatus.textContent = t('mapboxNotConfigured'); return; }
+    state.sharingPosition = true;
+    updateShareBtn();
+    shareStatus.textContent = t('shareActiveNote');
+    state.geoWatchId = navigator.geolocation.watchPosition((pos) => {
+      postToSheet({
+        action: 'updatePosition',
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        updatedAt: new Date().toISOString()
+      });
+    }, () => {
+      shareStatus.textContent = t('locationDenied');
+      state.sharingPosition = false;
+      updateShareBtn();
+    }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 });
+  };
 
   app.querySelectorAll('.del').forEach(el => {
     el.onclick = async () => {
@@ -1364,6 +1740,7 @@ function render(){
   if(existingBar) existingBar.remove();
 
   if(state.view === 'client') renderClient();
+  else if(state.view === 'track') renderTrack();
   else if(state.view === 'driver-login') renderDriverLogin();
   else if(state.view === 'driver') renderDriver();
 }

@@ -359,6 +359,30 @@
   .driver-card .sub{font-size:11.5px;color:var(--ink-dim);}
 
   .star-rating{display:flex;gap:6px;justify-content:center;margin:16px 0 6px;}
+
+  /* CURSEUR "GLISSER POUR DÉMARRER" */
+  .slide-track{
+    position:relative;width:100%;height:58px;background:var(--cream-2);border:2px solid var(--ink);
+    border-radius:var(--radius-pill);overflow:hidden;user-select:none;touch-action:none;
+  }
+  .slide-fill{
+    position:absolute;left:0;top:0;bottom:0;width:0;background:var(--gold);pointer-events:none;
+  }
+  .slide-label{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:13.5px;color:var(--ink);
+    pointer-events:none;
+  }
+  .slide-handle{
+    position:absolute;top:3px;left:3px;width:48px;height:48px;border-radius:50%;
+    background:var(--ink);color:var(--gold);display:flex;align-items:center;justify-content:center;
+    cursor:grab;box-shadow:2px 2px 0 rgba(0,0,0,0.2);transition:transform .05s linear;
+  }
+  .slide-handle:active{cursor:grabbing;}
+  .slide-handle svg{width:20px;height:20px;}
+  .slide-track.active .slide-handle{background:var(--confirm);}
+  .slide-track.snapping .slide-handle{transition:left .25s ease;}
+  .slide-track.snapping .slide-fill{transition:width .25s ease;}
   .star-rating .star{font-size:34px;cursor:pointer;color:var(--cream-2);transition:transform .1s;-webkit-text-stroke:2px var(--ink);}
   .star-rating .star.filled{color:var(--gold);}
   .star-rating .star:active{transform:scale(1.15);}
@@ -420,8 +444,8 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoibmJheWE4OCIsImEiOiJjbXU0MTV2YnMwZjY1MnpzN2gzajV
 const DRIVER_WHATSAPP = '33695567192';
 // Collez ici l'URL d'une photo de vous et de votre véhicule (hébergées n'importe où : Google Drive en partage public, Imgur, etc.)
 // Laissez tel quel si vous n'en avez pas encore : une icône par défaut s'affichera.
-const DRIVER_PHOTO_URL = 'https://commons.wikimedia.org/wiki/File:2023_Suzuki_Swace_1X7A7186.jpg#/media/Fichier:2023_Suzuki_Swace_1X7A7186.jpg';
-const VEHICLE_PHOTO_URL = 'https://www.magnific.com/fr/psd-gratuit/illustration-3d-personne-lunettes-soleil_27470334.htm#fromView=keyword&page=1&position=0&uuid=5d31fd74-b651-4f84-9245-f7cbb482bc0d&track=ais_hybrid&query=Man+emoji';
+const DRIVER_PHOTO_URL = '';
+const VEHICLE_PHOTO_URL = '';
 const DRIVER_DISPLAY_NAME = 'Votre chauffeur';
 const DRIVER_USERNAME = 'admin';
 const DRIVER_PASSWORD = 'vtc2026';
@@ -551,8 +575,8 @@ const I18N = {
     wrongPw: 'Mot de passe incorrect.',
     driverView: 'Vue chauffeur',
     sharePositionTitle: 'Position en direct',
-    sharePositionHint: "Activez avant de prendre la route pour que le client puisse suivre votre approche sur la carte. Gardez cette page ouverte pendant le trajet.",
-    shareStart: '📍 Démarrer le partage',
+    sharePositionHint: "Glissez pour démarrer avant de prendre la route, afin que le client puisse suivre votre approche sur la carte. Gardez cette page ouverte pendant le trajet.",
+    shareStart: 'Démarrer la course',
     shareStop: '⏹ Arrêter le partage',
     shareActiveNote: 'Position partagée en direct…',
     myCalendar: 'Mon calendrier',
@@ -683,8 +707,8 @@ const I18N = {
     wrongPw: 'Incorrect password.',
     driverView: 'Driver view',
     sharePositionTitle: 'Live position',
-    sharePositionHint: 'Turn on before you head out so the client can watch you approach on the map. Keep this page open during the ride.',
-    shareStart: '📍 Start sharing',
+    sharePositionHint: 'Slide to start before you head out so the client can watch you approach on the map. Keep this page open during the ride.',
+    shareStart: 'Start ride',
     shareStop: '⏹ Stop sharing',
     shareActiveNote: 'Sharing live position…',
     myCalendar: 'My calendar',
@@ -1424,15 +1448,20 @@ function vehiclePhotoHTML(){
 
 async function refreshLiveTracking(booking){
   const statEl = document.getElementById('trackStats');
+  const waitEl = document.getElementById('trackWaitingMsg');
+  const mapEl = document.getElementById('trackMap');
   try{
     const pos = await fetchDriverPosition();
-    if(!pos){ return; }
+    if(!pos){ if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t('trackWaitingLive'); } if(mapEl) mapEl.style.display = 'none'; return; }
     const ageMin = (Date.now() - new Date(pos.updatedAt).getTime()) / 60000;
-    if(ageMin > 30) return; // position trop ancienne, on ne l'affiche pas comme "en direct"
+    if(ageMin > 30){ if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t('trackWaitingLive'); } if(mapEl) mapEl.style.display = 'none'; return; }
 
     const pickupCoord = await geocodeAddress(booking.depart);
     const driverCoord = [pos.lng, pos.lat];
     const route = await routeBetweenCoords(driverCoord, pickupCoord);
+
+    if(waitEl) waitEl.style.display = 'none';
+    if(mapEl) mapEl.style.display = '';
 
     if(statEl){
       statEl.innerHTML = `
@@ -1458,13 +1487,19 @@ async function refreshLiveTracking(booking){
         const bounds = new mapboxgl.LngLatBounds(driverCoord, driverCoord).extend(pickupCoord);
         trackMapInstance.fitBounds(bounds, { padding: 50 });
       });
+      // Corrige un bug classique de Mapbox GL : la carte peut se dessiner en blanc/coupée
+      // si son conteneur n'avait pas encore sa taille définitive au moment de la création
+      // (fréquent sur tablette/PC où la mise en page se stabilise différemment que sur mobile).
+      setTimeout(() => trackMapInstance && trackMapInstance.resize(), 150);
+      window.addEventListener('resize', () => { if(trackMapInstance) trackMapInstance.resize(); });
     } else {
+      trackMapInstance.resize();
       trackMapInstance.driverMarker.setLngLat(driverCoord);
       if(trackMapInstance.getSource('route')){
         trackMapInstance.getSource('route').setData({ type:'Feature', geometry: route.geometry });
       }
     }
-  }catch(e){ /* pas de position disponible pour le moment */ }
+  }catch(e){ if(waitEl){ waitEl.style.display = ''; } }
 }
 
 function renderStars(container, currentValue){
@@ -1523,7 +1558,7 @@ function renderTrack(){
         </div>
 
         ${!past ? `
-          <div id="trackMap" class="track-map"></div>
+          <div id="trackMap" class="track-map" style="display:none;"></div>
           <div class="track-live-stats" id="trackStats"></div>
           <div id="trackWaitingMsg" class="track-waiting">${t('trackWaitingLive')}</div>
         ` : ''}
@@ -1655,7 +1690,13 @@ function renderDriver(){
       <div class="card" style="margin-top:18px;">
         <div class="section-title" style="margin-bottom:6px;">${t('sharePositionTitle')}</div>
         <div style="color:var(--ink-dim);font-size:12.5px;margin-bottom:12px;">${t('sharePositionHint')}</div>
-        <button class="primary-btn" id="shareToggleBtn" style="margin-top:0;">${t('shareStart')}</button>
+        <div class="slide-track" id="slideTrack">
+          <div class="slide-fill" id="slideFill"></div>
+          <div class="slide-label" id="slideLabel">${t('shareStart')}</div>
+          <div class="slide-handle" id="slideHandle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+        </div>
         <div id="shareStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
       </div>
 
@@ -1688,27 +1729,25 @@ function renderDriver(){
   const clearBtn = document.getElementById('clearSel');
   if(clearBtn) clearBtn.onclick = () => { state.selectedDate = null; render(); };
 
-  const shareBtn = document.getElementById('shareToggleBtn');
+  const slideTrack = document.getElementById('slideTrack');
+  const slideFill = document.getElementById('slideFill');
+  const slideLabel = document.getElementById('slideLabel');
+  const slideHandle = document.getElementById('slideHandle');
   const shareStatus = document.getElementById('shareStatus');
-  const updateShareBtn = () => {
-    shareBtn.textContent = state.sharingPosition ? t('shareStop') : t('shareStart');
-  };
-  updateShareBtn();
-  if(state.sharingPosition) shareStatus.textContent = t('shareActiveNote');
+  const handleSize = 48, margin = 3;
 
-  shareBtn.onclick = () => {
-    if(state.sharingPosition){
+  function startSharing(){
+    if(!navigator.geolocation){ shareStatus.textContent = t('locationDenied'); return false; }
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ shareStatus.textContent = t('mapboxNotConfigured'); return false; }
+    state.sharingPosition = true;
+    shareStatus.innerHTML = `${t('shareActiveNote')} <a href="#" id="stopShareLink" style="color:var(--ink);text-decoration:underline;">${t('shareStop')}</a>`;
+    document.getElementById('stopShareLink').onclick = (e) => {
+      e.preventDefault();
       if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
       state.sharingPosition = false;
       shareStatus.textContent = '';
-      updateShareBtn();
-      return;
-    }
-    if(!navigator.geolocation){ shareStatus.textContent = t('locationDenied'); return; }
-    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ shareStatus.textContent = t('mapboxNotConfigured'); return; }
-    state.sharingPosition = true;
-    updateShareBtn();
-    shareStatus.textContent = t('shareActiveNote');
+      resetSlider();
+    };
     state.geoWatchId = navigator.geolocation.watchPosition((pos) => {
       postToSheet({
         action: 'updatePosition',
@@ -1719,9 +1758,75 @@ function renderDriver(){
     }, () => {
       shareStatus.textContent = t('locationDenied');
       state.sharingPosition = false;
-      updateShareBtn();
+      resetSlider();
     }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 });
+    return true;
+  }
+
+  function setSlidePos(x, animate){
+    slideTrack.classList.toggle('snapping', !!animate);
+    slideHandle.style.left = x + 'px';
+    slideFill.style.width = (x + handleSize + margin) + 'px';
+  }
+
+  function resetSlider(){
+    slideTrack.classList.remove('active');
+    slideLabel.textContent = t('shareStart');
+    setSlidePos(margin, true);
+  }
+
+  if(state.sharingPosition){
+    slideTrack.classList.add('active');
+    slideLabel.textContent = '';
+    requestAnimationFrame(() => setSlidePos(slideTrack.offsetWidth - handleSize - margin, false));
+    shareStatus.innerHTML = `${t('shareActiveNote')} <a href="#" id="stopShareLink" style="color:var(--ink);text-decoration:underline;">${t('shareStop')}</a>`;
+    document.getElementById('stopShareLink').onclick = (e) => {
+      e.preventDefault();
+      if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
+      state.sharingPosition = false;
+      shareStatus.textContent = '';
+      resetSlider();
+    };
+  } else {
+    setSlidePos(margin, false);
+  }
+
+  let dragging = false, startX = 0, startLeft = margin;
+
+  slideHandle.addEventListener('pointerdown', (e) => {
+    if(state.sharingPosition) return;
+    dragging = true;
+    startX = e.clientX;
+    startLeft = margin;
+    slideTrack.classList.remove('snapping');
+    slideHandle.setPointerCapture(e.pointerId);
+  });
+
+  slideHandle.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    const maxLeft = slideTrack.offsetWidth - handleSize - margin;
+    let newLeft = startLeft + (e.clientX - startX);
+    newLeft = Math.max(margin, Math.min(maxLeft, newLeft));
+    setSlidePos(newLeft, false);
+  });
+
+  const endDrag = (e) => {
+    if(!dragging) return;
+    dragging = false;
+    const maxLeft = slideTrack.offsetWidth - handleSize - margin;
+    const current = parseFloat(slideHandle.style.left) || margin;
+    if(current >= maxLeft * 0.82){
+      setSlidePos(maxLeft, true);
+      slideTrack.classList.add('active');
+      slideLabel.textContent = '';
+      const ok = startSharing();
+      if(!ok) resetSlider();
+    } else {
+      resetSlider();
+    }
   };
+  slideHandle.addEventListener('pointerup', endDrag);
+  slideHandle.addEventListener('pointercancel', endDrag);
 
   app.querySelectorAll('.del').forEach(el => {
     el.onclick = async () => {

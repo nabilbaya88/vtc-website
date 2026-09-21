@@ -267,6 +267,10 @@
   .field-locate-btn.loading svg{animation:spin 1s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
+  .dt-pill{font-size:14px;}
+  .trip-summary-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;}
+  .trip-summary-row .edit-link{font-size:12.5px;color:var(--ink-dim);text-decoration:underline;cursor:pointer;flex-shrink:0;background:none;border:none;font-family:'Inter';}
+
   /* Suggestions d'adresses (autocomplétion) */
   .ac-dropdown{
     position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--white);
@@ -498,7 +502,16 @@ const I18N = {
     bentoCard3Title: 'Paiement CB & Espèces',
     bentoCard3Text: 'Carte bancaire ou espèces, comme vous préférez.',
     reservationTitle: 'Réservation',
-    stepLabels: ['Date','Détails','Confirmation'],
+    stepLabels: ['Trajet','Détails','Confirmation'],
+    whereTo: 'Où allez-vous ?',
+    dtNow: "Aujourd'hui, maintenant",
+    dtDateLabel: 'Date',
+    dtTimeLabel: 'Heure',
+    continueBtn: 'Continuer',
+    searchLocating: 'Localisation de votre position…',
+    searchCalculating: "Calcul de l'itinéraire et du prix…",
+    searchLocateFailed: 'Position non trouvée — vous pourrez saisir le départ manuellement.',
+    editTripLink: 'Modifier',
     chooseDate: 'Choisissez une date',
     alreadyBooked: 'Déjà réservé ce jour-là :',
     noneBooked: 'Aucune réservation ce jour-là pour le moment.',
@@ -630,7 +643,16 @@ const I18N = {
     bentoCard3Title: 'Card & Cash Payment',
     bentoCard3Text: 'Pay by card or cash, whichever you prefer.',
     reservationTitle: 'Booking',
-    stepLabels: ['Date','Details','Confirmation'],
+    stepLabels: ['Trip','Details','Confirmation'],
+    whereTo: 'Where to?',
+    dtNow: 'Today, now',
+    dtDateLabel: 'Date',
+    dtTimeLabel: 'Time',
+    continueBtn: 'Continue',
+    searchLocating: 'Finding your location…',
+    searchCalculating: 'Calculating route and price…',
+    searchLocateFailed: "Location not found — you'll be able to enter pickup manually.",
+    editTripLink: 'Edit',
     chooseDate: 'Choose a date',
     alreadyBooked: 'Already booked that day:',
     noneBooked: 'No bookings that day yet.',
@@ -736,6 +758,12 @@ let state = {
   bookingStep: 1,
   cursorDate: new Date(),
   selectedDate: null,
+  tripArrivee: '',
+  tripDepart: '',
+  tripKm: '',
+  tripDate: (() => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })(),
+  tripTime: (() => { const d = new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); })(),
+  tripDtCustomized: false,
   bookings: [],
   lastBooking: null
 };
@@ -780,7 +808,8 @@ async function loadBookings(silent){
   const isFillingForm = state.bookingOpen && state.bookingStep === 2;
   if(!silent && !isFillingForm) render();
 }
-setInterval(() => { if(!APPS_SCRIPT_URL.includes('COLLEZ_ICI')) loadBookings(); }, 20000);
+// (Rafraîchissement automatique désactivé à la demande du client — les données
+// se rechargent seulement à l'ouverture de la page ou après une action de l'utilisateur)
 
 function bookingsOnDate(key){
   return state.bookings.filter(b => b.date === key).sort((a,b)=> a.time.localeCompare(b.time));
@@ -872,7 +901,7 @@ async function fetchAddressSuggestions(query){
   return (data.features || []).map(f => f.place_name);
 }
 
-function setupAutocomplete(inputId, dropdownId){
+function setupAutocomplete(inputId, dropdownId, onSelect){
   const input = document.getElementById(inputId);
   const dropdown = document.getElementById(dropdownId);
   if(!input || !dropdown) return;
@@ -895,6 +924,7 @@ function setupAutocomplete(inputId, dropdownId){
           item.onclick = () => {
             input.value = suggestions[i];
             closeDropdown();
+            if(onSelect) onSelect(suggestions[i]);
           };
         });
         dropdown.classList.add('show');
@@ -1184,26 +1214,43 @@ function renderBookingOverlay(){
   let headerTitle = t('chooseDate');
 
   if(step === 1){
-    headerTitle = t('chooseDate');
+    headerTitle = t('whereTo');
+    const dtLabel = state.tripDtCustomized
+      ? `${state.tripDate} · ${state.tripTime}`
+      : t('dtNow');
     stepContent = `
       <div class="step-panel">
-        <div id="calendar"></div>
-        ${selected ? `
-          <div class="slots-list">
-            ${slotsForDay.length ? `${t('alreadyBooked')} ${slotsForDay.map(b=>`<span>${b.time}</span>`).join('')}` : t('noneBooked')}
+        <label>${t('whereTo')}</label>
+        <div class="field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3v18M6 4h11l-2.5 3.5L17 11H6"/></svg>
+          <input type="text" id="s_arrivee" placeholder="${t('arriveePlaceholder')}" value="${state.tripArrivee || ''}">
+          <div class="ac-dropdown" id="s-arrivee-ac"></div>
+        </div>
+
+        <button type="button" class="ghost-btn dt-pill" id="dtPillBtn" style="width:100%;margin-top:16px;justify-content:center;display:flex;gap:8px;">
+          <span>📅</span><span id="dtPillLabel">${dtLabel}</span>
+        </button>
+        <div class="row2" id="dtInputs" style="display:none;margin-top:12px;">
+          <div>
+            <label>${t('dtDateLabel')}</label>
+            <input type="date" id="s_date" value="${state.tripDate}">
           </div>
-        `: ''}
+          <div>
+            <label>${t('dtTimeLabel')}</label>
+            <input type="time" id="s_time" value="${state.tripTime}">
+          </div>
+        </div>
+
+        <div id="searchStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:16px;min-height:16px;"></div>
+        <button class="primary-btn" id="searchNextBtn" style="margin-top:6px;">${t('continueBtn')}</button>
       </div>`;
   } else if(step === 2){
     headerTitle = t('detailsTitle');
     stepContent = `
       <div class="step-panel">
-        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:16px;">${t('onDate')} ${selected}</div>
-
-        <label>${t('timeLabel')}</label>
-        <div class="field">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-          <input type="time" id="f_time">
+        <div class="trip-summary-row">
+          <div style="color:var(--ink-dim);font-size:13px;">${t('onDate')} ${state.tripDate} · ${state.tripTime}</div>
+          <button type="button" class="edit-link" id="editTripBtn">${t('editTripLink')}</button>
         </div>
 
         <label>${t('nameLabel')}</label>
@@ -1227,7 +1274,7 @@ function renderBookingOverlay(){
         <label>${t('departLabel')}</label>
         <div class="field has-locate">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/></svg>
-          <input type="text" id="f_depart" placeholder="${t('departPlaceholder')}">
+          <input type="text" id="f_depart" placeholder="${t('departPlaceholder')}" value="${state.tripDepart || ''}">
           <button type="button" class="field-locate-btn" id="locateBtn" title="${t('useMyLocation')}" aria-label="${t('useMyLocation')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
           </button>
@@ -1238,7 +1285,7 @@ function renderBookingOverlay(){
         <label>${t('arriveeLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3v18M6 4h11l-2.5 3.5L17 11H6"/></svg>
-          <input type="text" id="f_arrivee" placeholder="${t('arriveePlaceholder')}">
+          <input type="text" id="f_arrivee" placeholder="${t('arriveePlaceholder')}" value="${state.tripArrivee || ''}">
           <div class="ac-dropdown" id="arrivee-ac"></div>
         </div>
 
@@ -1251,7 +1298,7 @@ function renderBookingOverlay(){
             <label>${t('kmLabel')}</label>
             <div class="field">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18M3 12l4-4M3 12l4 4M21 12l-4-4M21 12l-4 4"/></svg>
-              <input type="number" id="f_km" placeholder="${t('kmPlaceholder')}">
+              <input type="number" id="f_km" placeholder="${t('kmPlaceholder')}" value="${state.tripKm || ''}">
             </div>
           </div>
           <div>
@@ -1326,7 +1373,60 @@ function renderBookingOverlay(){
     else { state.bookingOpen = false; render(); }
   };
 
-  if(step === 1){ buildCalendar(document.getElementById('calendar')); }
+  if(step === 1){
+    const dtPillBtn = document.getElementById('dtPillBtn');
+    const dtInputs = document.getElementById('dtInputs');
+    const dtPillLabel = document.getElementById('dtPillLabel');
+    const sDate = document.getElementById('s_date');
+    const sTime = document.getElementById('s_time');
+
+    dtPillBtn.onclick = () => {
+      dtInputs.style.display = dtInputs.style.display === 'none' ? 'grid' : 'none';
+    };
+    const refreshPillLabel = () => {
+      state.tripDtCustomized = true;
+      dtPillLabel.textContent = `${sDate.value} · ${sTime.value}`;
+    };
+    sDate.onchange = refreshPillLabel;
+    sTime.onchange = refreshPillLabel;
+
+    setupAutocomplete('s_arrivee', 's-arrivee-ac');
+
+    const statusEl = document.getElementById('searchStatus');
+
+    document.getElementById('searchNextBtn').onclick = async () => {
+      const arrivee = document.getElementById('s_arrivee').value.trim();
+      if(!arrivee){ statusEl.textContent = t('fillAlert'); return; }
+
+      state.tripArrivee = arrivee;
+      state.tripDate = sDate.value || state.tripDate;
+      state.tripTime = sTime.value || state.tripTime;
+      state.selectedDate = state.tripDate;
+
+      if(!state.tripDepart && navigator.geolocation && !MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+        statusEl.textContent = t('searchLocating');
+        try{
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 });
+          });
+          state.tripDepart = await reverseGeocode(pos.coords.longitude, pos.coords.latitude);
+        }catch(e){
+          statusEl.textContent = t('searchLocateFailed');
+        }
+      }
+
+      if(state.tripDepart && !MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+        statusEl.textContent = t('searchCalculating');
+        try{
+          const result = await calculateRoute(state.tripDepart, state.tripArrivee);
+          state.tripKm = result.km;
+        }catch(e){ /* on laissera l'utilisateur recalculer à l'étape suivante */ }
+      }
+
+      state.bookingStep = 2;
+      render();
+    };
+  }
 
   if(step === 2){
     const kmInput = document.getElementById('f_km');
@@ -1336,8 +1436,11 @@ function renderBookingOverlay(){
       const p = estimatePrice(kmInput.value, minInput.value);
       bbPrice.textContent = p ? `≈ ${p} €` : '— €';
     };
+    updatePrice();
     kmInput.oninput = () => { minInput.value=''; updatePrice(); };
     minInput.oninput = () => { kmInput.value=''; updatePrice(); };
+
+    document.getElementById('editTripBtn').onclick = () => { state.bookingStep = 1; render(); };
 
     setupAutocomplete('f_depart', 'depart-ac');
     setupAutocomplete('f_arrivee', 'arrivee-ac');
@@ -1366,16 +1469,16 @@ function renderBookingOverlay(){
 
     document.getElementById('submitBtn').onclick = async () => {
       const name = document.getElementById('f_name').value.trim();
-      const time = document.getElementById('f_time').value;
+      const time = state.tripTime;
       const phone = document.getElementById('f_phone').value.trim();
       const email = document.getElementById('f_email').value.trim();
       const depart = document.getElementById('f_depart').value.trim();
       const arrivee = document.getElementById('f_arrivee').value.trim();
-      if(!time || !phone || !depart || !arrivee){ alert(t('fillAlert')); return; }
+      if(!phone || !depart || !arrivee){ alert(t('fillAlert')); return; }
       const price = estimatePrice(kmInput.value, minInput.value);
       const booking = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-        date: selected, time, name: name || null, phone, email: email || null, depart, arrivee,
+        date: state.tripDate, time, name: name || null, phone, email: email || null, depart, arrivee,
         km: kmInput.value || null, min: minInput.value || null, price: price || null,
         createdAt: new Date().toISOString()
       };
@@ -1385,11 +1488,12 @@ function renderBookingOverlay(){
       const T = I18N[state.lang];
       const msg = `${T.waMsgIntro}%0A` +
         (name ? `${T.receiptName} : ${name}%0A` : '') +
-        `${T.waDate} : ${selected}%0A${T.waTime} : ${time}%0A${T.waDepart} : ${depart}%0A${T.waArrivee} : ${arrivee}%0A${T.waPhone} : ${phone}` +
+        `${T.waDate} : ${state.tripDate}%0A${T.waTime} : ${time}%0A${T.waDepart} : ${depart}%0A${T.waArrivee} : ${arrivee}%0A${T.waPhone} : ${phone}` +
         (price ? `%0A${T.waEstimate} : ≈ ${price} €` : '');
       booking.waHref = `https://wa.me/${DRIVER_WHATSAPP}?text=${msg}`;
       state.lastBooking = booking;
       state.bookingStep = 3;
+      state.tripArrivee = ''; state.tripDepart = ''; state.tripKm = ''; state.tripDtCustomized = false;
       render();
     };
   }

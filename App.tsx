@@ -1,4 +1,4 @@
---- src/App.tsx (原始)
+
 import { useState, useEffect } from 'react';
 import {
   Phone, Mail, MapPin, Clock, Star, Shield, CreditCard,

@@ -1,4 +1,4 @@
---- src/App.tsx (原始)
+
 import { useState, useEffect, useRef, ReactNode } from 'react';
 import {
   Car, MapPin, Clock, Plane, Train,

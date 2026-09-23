@@ -1,4 +1,4 @@
---- src/hooks/useAnimations.tsx (原始)
+
 import { useState, useEffect, useRef, ReactNode } from 'react';
 
 // Intersection Observer Hook for scroll animations
@@ -73,4 +73,3 @@ export function AnimatedSection({ children, className = '', delay = 0 }: { child
 }
 
 
-+++ src/hooks/useAnimations.tsx (修改后)

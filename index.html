@@ -4,15 +4,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Service VTC Premium à Paris et en Île-de-France. Chauffeur privé disponible 24h/24, 7j/7." />
+    <meta name="description" content="Service VTC Premium à Paris et en Île-de-France. Chauffeur privé disponible 24h/24, 7j/7. Réservation rapide et confirmation instantanée." />
     <meta name="theme-color" content="#0a0a0f" />
     <title>VTC Paris — Service de Transport Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
     <style>
       html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
       html { background-color: #0a0a0f !important; color: #ffffff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+      /* Prevent flash */
       #root { min-height: 100vh; }
     </style>
     <script>
@@ -26,7 +27,7 @@
         if (isInIframe) {
           window.addEventListener("message", function (event) {
             if (event.data && typeof event.data.theme === "string") {
-              var theme = event.data.theme;
+              const theme = event.data.theme;
               if (theme === "light" || theme === "dark") applyThemeToDOM(theme);
             }
           });
@@ -49,9 +50,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Transfert Chauffeur Privé — Réservation VTC Paris. Service disponible 24h/24, 7j/7 en Île-de-France." />
+    <meta name="description" content="Service VTC Premium à Paris et en Île-de-France. Chauffeur privé disponible 24h/24, 7j/7." />
     <meta name="theme-color" content="#0a0a0f" />
-    <title>Transfert Chauffeur Privé — Réservation VTC Paris</title>
+    <title>VTC Paris — Service de Transport Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
@@ -62,7 +63,7 @@
     </style>
     <script>
       (function () {
-        var isInIframe = window.self !== window.top;
+        const isInIframe = window.self !== window.top;
         function applyThemeToDOM(theme) {
           document.documentElement.classList.remove("light", "dark");
           document.documentElement.classList.add(theme);

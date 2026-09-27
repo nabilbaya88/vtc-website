@@ -487,14 +487,14 @@
 <div id="app"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwG5c3dxyKnZhAaEZMqwdgr15FDjm1tvXEZ4w5sUDczISdrFnsWNT1EcEzUgSf8-pHu/exec';
+const APPS_SCRIPT_URL = 'COLLEZ_ICI_VOTRE_URL_APPS_SCRIPT';
 // Clé API HERE (Platform.here.com > Projects > votre projet > REST API key)
 const HERE_API_KEY = 'lDqm6cc8GY7_EUpNPhmn9qDIKhbFD1_IYy91h1Q87nk';
 const DRIVER_WHATSAPP = '33695567192';
 // Collez ici l'URL d'une photo de vous et de votre véhicule (hébergées n'importe où : Google Drive en partage public, Imgur, etc.)
 // Laissez tel quel si vous n'en avez pas encore : une icône par défaut s'affichera.
-const DRIVER_PHOTO_URL = 'https://imgur.com/a/EPlu7hA';
-const VEHICLE_PHOTO_URL = 'https://imgur.com/a/XM65pdN';
+const DRIVER_PHOTO_URL = '';
+const VEHICLE_PHOTO_URL = '';
 const DRIVER_DISPLAY_NAME = 'Votre chauffeur';
 const COMPANY_NAME = 'COLLEZ_ICI_NOM_DE_VOTRE_SOCIETE';
 const COMPANY_SIRET = 'COLLEZ_ICI_VOTRE_SIRET';
@@ -1735,14 +1735,41 @@ function isBookingPast(b){
   }catch(e){ return false; }
 }
 
+// Fusionne le profil enregistré (Google Sheet) avec les constantes par défaut du fichier
+function driverProfile(){
+  const p = state.driverProfileData || {};
+  return {
+    photo: p.photo || DRIVER_PHOTO_URL,
+    vehiclePhoto: p.vehiclePhoto || VEHICLE_PHOTO_URL,
+    name: p.name || DRIVER_DISPLAY_NAME,
+    company: p.company || COMPANY_NAME,
+    siret: p.siret || COMPANY_SIRET,
+    address: p.address || DRIVER_ADDRESS,
+    phone: p.phone || DRIVER_PHONE_DISPLAY,
+    email: p.email || DRIVER_EMAIL,
+    vehicleModel: p.vehicleModel || VEHICLE_MODEL,
+    vehiclePlate: p.vehiclePlate || VEHICLE_PLATE
+  };
+}
+
+async function loadDriverProfile(){
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')) return;
+  try{
+    const saved = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=profile`);
+    if(saved) state.driverProfileData = saved;
+  }catch(e){ /* pas de profil enregistré pour le moment */ }
+}
+
 function driverPhotoHTML(){
-  return DRIVER_PHOTO_URL
-    ? `<img class="driver-photo" src="${DRIVER_PHOTO_URL}" alt="${DRIVER_DISPLAY_NAME}">`
+  const p = driverProfile();
+  return p.photo
+    ? `<img class="driver-photo" src="${p.photo}" alt="${p.name}">`
     : `<div class="driver-photo">🧑‍✈️</div>`;
 }
 function vehiclePhotoHTML(){
-  return VEHICLE_PHOTO_URL
-    ? `<img class="vehicle-photo" src="${VEHICLE_PHOTO_URL}" alt="Véhicule">`
+  const p = driverProfile();
+  return p.vehiclePhoto
+    ? `<img class="vehicle-photo" src="${p.vehiclePhoto}" alt="Véhicule">`
     : `<div class="vehicle-photo">🚘</div>`;
 }
 

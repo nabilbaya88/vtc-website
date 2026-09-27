@@ -478,27 +478,31 @@
 </head>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+<script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+<script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+<script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+<link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.1/cdn.min.js"></script>
 <div id="app"></div>
 
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwG5c3dxyKnZhAaEZMqwdgr15FDjm1tvXEZ4w5sUDczISdrFnsWNT1EcEzUgSf8-pHu/exec';
-// Collez ici votre token public Mapbox (Compte Mapbox > Tokens)
-const MAPBOX_TOKEN = 'pk.eyJ1IjoibmJheWE4OCIsImEiOiJjbXU0MTV2YnMwZjY1MnpzN2gzajVmZzR6In0.0tWKbKLi6SCdi0zb6RzKYQ';
+// Clé API HERE (Platform.here.com > Projects > votre projet > REST API key)
+const HERE_API_KEY = 'lDqm6cc8GY7_EUpNPhmn9qDIKhbFD1_IYy91h1Q87nk';
 const DRIVER_WHATSAPP = '33695567192';
 // Collez ici l'URL d'une photo de vous et de votre véhicule (hébergées n'importe où : Google Drive en partage public, Imgur, etc.)
 // Laissez tel quel si vous n'en avez pas encore : une icône par défaut s'affichera.
-const DRIVER_PHOTO_URL = 'https://imgur.com/a/Pqc7Bk1';
-const VEHICLE_PHOTO_URL = 'https://imgur.com/a/dTP8zh9';
-const DRIVER_DISPLAY_NAME = 'Nabil';
+const DRIVER_PHOTO_URL = 'https://imgur.com/a/EPlu7hA';
+const VEHICLE_PHOTO_URL = 'https://imgur.com/a/XM65pdN';
+const DRIVER_DISPLAY_NAME = 'Votre chauffeur';
 const COMPANY_NAME = 'COLLEZ_ICI_NOM_DE_VOTRE_SOCIETE';
 const COMPANY_SIRET = 'COLLEZ_ICI_VOTRE_SIRET';
 const DRIVER_PHONE_DISPLAY = 'COLLEZ_ICI_VOTRE_NUMERO';
 const DRIVER_EMAIL = 'COLLEZ_ICI_VOTRE_EMAIL';
 const VEHICLE_MODEL = 'COLLEZ_ICI_MODELE_VEHICULE';
 const VEHICLE_PLATE = 'COLLEZ_ICI_PLAQUE_IMMATRICULATION';
+const DRIVER_ADDRESS = 'COLLEZ_ICI_VOTRE_ADRESSE';
 const DRIVER_USERNAME = 'admin';
 const DRIVER_PASSWORD = 'vtc2026';
 
@@ -554,6 +558,10 @@ const I18N = {
     stageLabelInProgress: 'Course en cours',
     stageLabelCompleted: 'Course terminée',
     courseCompletedNote: 'Cette course est terminée. Retour à votre espace…',
+    openWaze: 'Waze',
+    openGmaps: 'Maps',
+    openWhatsapp: 'WhatsApp',
+    callClient: 'Appeler',
     trackKmLeft: 'km restants',
     trackMinLeft: 'min restantes',
     trackWaitingLive: 'Le chauffeur partagera sa position environ 1h avant votre prise en charge. Revenez sur cette page à ce moment-là pour le suivre en direct.',
@@ -563,6 +571,13 @@ const I18N = {
     legalVehicle: 'Véhicule',
     legalPhone: 'Téléphone',
     legalEmail: 'E-mail',
+    legalAddress: 'Adresse',
+    tabMyInfo: 'Mes infos',
+    tabClientInfo: 'Client',
+    tabCourseTracking: 'Suivi',
+    myInfoTitle: 'Mes informations',
+    clientInfoTitle: 'Informations client',
+    infoName: 'Nom',
     trackRateTitle: "Comment s'est passée votre course ?",
     trackRateSubmit: 'Envoyer ma note',
     trackRateThanks: 'Merci pour votre retour !',
@@ -724,6 +739,10 @@ const I18N = {
     stageLabelInProgress: 'Ride in progress',
     stageLabelCompleted: 'Ride completed',
     courseCompletedNote: 'This ride is complete. Returning to your dashboard…',
+    openWaze: 'Waze',
+    openGmaps: 'Maps',
+    openWhatsapp: 'WhatsApp',
+    callClient: 'Call',
     trackKmLeft: 'km left',
     trackMinLeft: 'min left',
     trackWaitingLive: 'Your driver will share their position about 1 hour before pickup. Come back to this page then to track live.',
@@ -733,6 +752,13 @@ const I18N = {
     legalVehicle: 'Vehicle',
     legalPhone: 'Phone',
     legalEmail: 'Email',
+    legalAddress: 'Address',
+    tabMyInfo: 'My info',
+    tabClientInfo: 'Client',
+    tabCourseTracking: 'Tracking',
+    myInfoTitle: 'My information',
+    clientInfoTitle: 'Client information',
+    infoName: 'Name',
     trackRateTitle: 'How was your ride?',
     trackRateSubmit: 'Submit rating',
     trackRateThanks: 'Thanks for your feedback!',
@@ -862,6 +888,7 @@ let state = {
   geoWatchId: null,
   driverTab: 'upcoming',
   driverCourseId: null,
+  driverCourseTab: 'tracking',
   trackResults: null,
   accountResults: null,
   pendingTrackRef: null,
@@ -979,90 +1006,57 @@ function estimatePrice(km, min){
   return (base + distanceKm * 1.5).toFixed(0);
 }
 
-// Centre Paris/Île-de-France utilisé pour prioriser les résultats de recherche
-const IDF_PROXIMITY = '2.3522,48.8566';
-const IDF_BBOX = '1.4,48.1,3.6,49.3'; // limite large de l'Île-de-France (ouest,sud,est,nord)
+// Centre Paris/Île-de-France utilisé pour prioriser les résultats de recherche (lat,lng — format HERE)
+const IDF_AT = '48.8566,2.3522';
+const HERE_LANG = () => (state.lang === 'fr' ? 'fr' : 'en');
 
-// Jeton de session Mapbox Search Box (requis par l'API, un par "session" de recherche)
-function newSearchSession(){
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random()*16|0;
-    return (c === 'x' ? r : (r&0x3|0x8)).toString(16);
-  });
-}
-
-// API Mapbox Search Box — bien meilleure couverture des lieux (gares, aéroports, monuments)
-// que l'ancienne API Geocoding, qui ne référence quasiment que les adresses postales.
-async function suggestPlaces(query, sessionToken){
-  const url = `https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(query)}&access_token=${MAPBOX_TOKEN}&session_token=${sessionToken}&language=${state.lang}&country=fr&proximity=${IDF_PROXIMITY}&bbox=${IDF_BBOX}&types=poi,address,place,street,neighborhood&limit=6`;
+// API HERE Autosuggest — bonne couverture des lieux (gares, aéroports, monuments)
+// Retourne directement l'adresse ET les coordonnées, sans étape de "retrieve" séparée.
+async function suggestPlaces(query){
+  const url = `https://autosuggest.search.hereapi.com/v1/autosuggest?apikey=${HERE_API_KEY}&q=${encodeURIComponent(query)}&at=${IDF_AT}&in=countryCode:FRA&limit=6&lang=${HERE_LANG()}`;
   const res = await fetch(url);
   if(!res.ok){
     let detail = '';
-    try{ const errData = await res.json(); detail = errData.message || ''; }catch(e){}
+    try{ const errData = await res.json(); detail = errData.title || ''; }catch(e){}
     throw new Error(`HTTP ${res.status}${detail ? ' — ' + detail : ''}`);
   }
   const data = await res.json();
-  return (data.suggestions || []).map(s => ({
-    id: s.mapbox_id,
-    label: s.name + (s.place_formatted ? ' — ' + s.place_formatted : '')
-  }));
-}
-
-async function retrievePlace(mapboxId, sessionToken){
-  const url = `https://api.mapbox.com/search/searchbox/v1/retrieve/${mapboxId}?access_token=${MAPBOX_TOKEN}&session_token=${sessionToken}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('retrieve failed');
-  const data = await res.json();
-  const feature = data.features && data.features[0];
-  if(!feature) throw new Error('no result');
-  return {
-    address: feature.properties.full_address || feature.properties.name,
-    coords: feature.geometry.coordinates // [lon, lat]
-  };
+  return (data.items || [])
+    .filter(it => it.position || (it.access && it.access[0]))
+    .map(it => {
+      const pos = it.position || it.access[0];
+      const addressLabel = (it.address && it.address.label) ? it.address.label : it.title;
+      return { id: it.id, label: addressLabel, address: addressLabel, coords: [pos.lng, pos.lat] };
+    });
 }
 
 async function geocodeAddress(query){
-  // On utilise d'abord la Search Box API (bien meilleure sur les gares/aéroports)
+  // On tente d'abord Autosuggest (meilleure couverture gares/aéroports/lieux)
   try{
-    const session = newSearchSession();
-    const suggestions = await suggestPlaces(query, session);
-    if(suggestions.length){
-      const place = await retrievePlace(suggestions[0].id, session);
-      if(place.coords) return place.coords;
-    }
+    const suggestions = await suggestPlaces(query);
+    if(suggestions.length && suggestions[0].coords) return suggestions[0].coords;
   }catch(e){ /* on tente le repli ci-dessous */ }
 
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&limit=1&country=fr&language=${state.lang}&proximity=${IDF_PROXIMITY}&bbox=${IDF_BBOX}&types=poi,address,place,locality,neighborhood`;
+  const url = `https://geocode.search.hereapi.com/v1/geocode?apikey=${HERE_API_KEY}&q=${encodeURIComponent(query)}&at=${IDF_AT}&in=countryCode:FRA&limit=1&lang=${HERE_LANG()}`;
   const res = await fetch(url);
   if(!res.ok) throw new Error('geocode failed');
   const data = await res.json();
-  if(!data.features || !data.features.length) throw new Error('no result');
-  return data.features[0].center; // [lon, lat]
+  if(!data.items || !data.items.length) throw new Error('no result');
+  const pos = data.items[0].position;
+  return [pos.lng, pos.lat]; // [lon, lat]
 }
 
 async function reverseGeocode(lon, lat){
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${MAPBOX_TOKEN}&language=${state.lang}&limit=1`;
+  const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?apikey=${HERE_API_KEY}&at=${lat},${lon}&limit=1&lang=${HERE_LANG()}`;
   const res = await fetch(url);
   if(!res.ok){
     let detail = '';
-    try{ const errData = await res.json(); detail = errData.message || ''; }catch(e){}
+    try{ const errData = await res.json(); detail = errData.title || ''; }catch(e){}
     throw new Error(`HTTP ${res.status}${detail ? ' — ' + detail : ''}`);
   }
   const data = await res.json();
-  if(!data.features || !data.features.length) throw new Error('Aucun résultat pour ces coordonnées');
-  return data.features[0].place_name;
-}
-
-async function fetchAddressSuggestions(query){
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&limit=6&country=fr&language=${state.lang}&proximity=${IDF_PROXIMITY}&bbox=${IDF_BBOX}&types=poi,address,place,locality,neighborhood`;
-  const res = await fetch(url);
-  if(!res.ok){
-    let detail = '';
-    try{ const errData = await res.json(); detail = errData.message || ''; }catch(e){}
-    throw new Error(`HTTP ${res.status}${detail ? ' — ' + detail : ''}`);
-  }
-  const data = await res.json();
-  return (data.features || []).map(f => f.place_name);
+  if(!data.items || !data.items.length) throw new Error('Aucun résultat pour ces coordonnées');
+  return data.items[0].address.label;
 }
 
 function setupAutocomplete(inputId, dropdownId, onSelect){
@@ -1070,34 +1064,25 @@ function setupAutocomplete(inputId, dropdownId, onSelect){
   const dropdown = document.getElementById(dropdownId);
   if(!input || !dropdown) return;
   let debounceTimer;
-  let sessionToken = newSearchSession();
 
   const closeDropdown = () => { dropdown.classList.remove('show'); dropdown.innerHTML = ''; };
 
   input.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const query = input.value.trim();
-    if(query.length < 3 || MAPBOX_TOKEN.includes('COLLEZ_ICI')){ closeDropdown(); return; }
+    if(query.length < 3 || HERE_API_KEY.includes('COLLEZ_ICI')){ closeDropdown(); return; }
     debounceTimer = setTimeout(async () => {
       try{
-        const suggestions = await suggestPlaces(query, sessionToken);
+        const suggestions = await suggestPlaces(query);
         if(!suggestions.length){ closeDropdown(); return; }
         dropdown.innerHTML = suggestions.map((s, i) =>
           `<div class="ac-item" data-idx="${i}">${s.label}</div>`
         ).join('');
         dropdown.querySelectorAll('.ac-item').forEach((item, i) => {
-          item.onclick = async () => {
+          item.onclick = () => {
             closeDropdown();
-            try{
-              const place = await retrievePlace(suggestions[i].id, sessionToken);
-              input.value = place.address;
-              sessionToken = newSearchSession(); // nouvelle session après sélection, comme recommandé par Mapbox
-              if(onSelect) onSelect(place);
-            }catch(e){
-              console.error('Retrieve error:', e);
-              input.value = suggestions[i].label;
-              if(onSelect) onSelect({ address: suggestions[i].label, coords: null });
-            }
+            input.value = suggestions[i].address;
+            if(onSelect) onSelect(suggestions[i]);
           };
         });
         dropdown.classList.add('show');
@@ -1113,7 +1098,7 @@ function setupAutocomplete(inputId, dropdownId, onSelect){
 function locateUser(targetInputId, statusElId, btnEl, onDone){
   const statusEl = document.getElementById(statusElId);
   if(!navigator.geolocation){ statusEl.textContent = t('locationDenied'); return; }
-  if(MAPBOX_TOKEN.includes('COLLEZ_ICI')){ statusEl.textContent = t('mapboxNotConfigured'); return; }
+  if(HERE_API_KEY.includes('COLLEZ_ICI')){ statusEl.textContent = t('mapboxNotConfigured'); return; }
   btnEl.classList.add('loading');
   statusEl.textContent = t('locatingUser');
   navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -1138,34 +1123,27 @@ async function calculateRoute(departAddress, arriveeAddress){
     geocodeAddress(departAddress),
     geocodeAddress(arriveeAddress)
   ]);
-  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${from[0]},${from[1]};${to[0]},${to[1]}?access_token=${MAPBOX_TOKEN}&overview=false`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('directions failed');
-  const data = await res.json();
-  if(!data.routes || !data.routes.length) throw new Error('no route');
-  const route = data.routes[0];
-  return {
-    km: (route.distance / 1000).toFixed(1),
-    min: Math.round(route.duration / 60)
-  };
+  return routeBetweenCoords(from, to);
 }
 
 function fetchDriverPosition(){
   return fetchViaJsonp(`${APPS_SCRIPT_URL}?type=position`);
 }
 
-// Trajet complet avec géométrie (pour tracer la ligne sur la carte) entre deux coordonnées [lon,lat]
+// Trajet complet (avec tracé encodé "flexible polyline") entre deux coordonnées [lon,lat]
 async function routeBetweenCoords(fromCoord, toCoord){
-  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${fromCoord[0]},${fromCoord[1]};${toCoord[0]},${toCoord[1]}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full`;
+  const origin = `${fromCoord[1]},${fromCoord[0]}`;
+  const dest = `${toCoord[1]},${toCoord[0]}`;
+  const url = `https://router.hereapi.com/v8/routes?transportMode=car&origin=${origin}&destination=${dest}&return=summary,polyline&apikey=${HERE_API_KEY}`;
   const res = await fetch(url);
   if(!res.ok) throw new Error('directions failed');
   const data = await res.json();
   if(!data.routes || !data.routes.length) throw new Error('no route');
-  const route = data.routes[0];
+  const section = data.routes[0].sections[0];
   return {
-    km: (route.distance / 1000).toFixed(1),
-    min: Math.round(route.duration / 60),
-    geometry: route.geometry
+    km: (section.summary.length / 1000).toFixed(1),
+    min: Math.round(section.summary.duration / 60),
+    polyline: section.polyline
   };
 }
 
@@ -1565,7 +1543,7 @@ function renderBookingOverlay(){
     updateEstimate();
 
     const tryCalcRoute = async () => {
-      if(!state.tripDepart || !state.tripArrivee || MAPBOX_TOKEN.includes('COLLEZ_ICI')) return;
+      if(!state.tripDepart || !state.tripArrivee || HERE_API_KEY.includes('COLLEZ_ICI')) return;
       statusEl.textContent = t('searchCalculating');
       try{
         const result = (state.tripDepartCoords && state.tripArriveeCoords)
@@ -1581,7 +1559,7 @@ function renderBookingOverlay(){
       if(departWrap.style.display !== 'none') return;
       departWrap.style.display = 'block';
       departWrap.classList.add('expand-in');
-      if(!state.tripDepart && navigator.geolocation && !MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+      if(!state.tripDepart && navigator.geolocation && !HERE_API_KEY.includes('COLLEZ_ICI')){
         statusEl.textContent = t('searchLocating');
         try{
           const pos = await new Promise((resolve, reject) => {
@@ -1648,7 +1626,7 @@ function renderBookingOverlay(){
       state.tripTime = sTime.value || state.tripTime;
       state.selectedDate = state.tripDate;
 
-      if(!state.tripDepart && navigator.geolocation && !MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+      if(!state.tripDepart && navigator.geolocation && !HERE_API_KEY.includes('COLLEZ_ICI')){
         statusEl.textContent = t('searchLocating');
         try{
           const pos = await new Promise((resolve, reject) => {
@@ -1772,15 +1750,25 @@ async function refreshLiveTracking(booking){
   const statEl = document.getElementById('trackStats');
   const waitEl = document.getElementById('trackWaitingMsg');
   const mapEl = document.getElementById('trackMap');
+
+  // La carte ne s'affiche que si le chauffeur a démarré sa prise en charge (statut ≠ "pending")
+  const status = booking.status || 'pending';
+  if(status === 'pending'){
+    if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t('trackWaitingLive'); }
+    if(mapEl) mapEl.style.display = 'none';
+    return;
+  }
+
   try{
     const pos = await fetchDriverPosition();
     if(!pos){ if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t('trackWaitingLive'); } if(mapEl) mapEl.style.display = 'none'; return; }
     const ageMin = (Date.now() - new Date(pos.updatedAt).getTime()) / 60000;
     if(ageMin > 30){ if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t('trackWaitingLive'); } if(mapEl) mapEl.style.display = 'none'; return; }
 
-    const pickupCoord = await geocodeAddress(booking.depart);
+    const targetAddress = status === 'in_progress' ? booking.arrivee : booking.depart;
+    const targetCoord = await geocodeAddress(targetAddress);
     const driverCoord = [pos.lng, pos.lat];
-    const route = await routeBetweenCoords(driverCoord, pickupCoord);
+    const route = await routeBetweenCoords(driverCoord, targetCoord);
 
     if(waitEl) waitEl.style.display = 'none';
     if(mapEl) mapEl.style.display = '';
@@ -1792,34 +1780,30 @@ async function refreshLiveTracking(booking){
       `;
     }
 
+    const lineString = H.geo.LineString.fromFlexiblePolyline(route.polyline);
+    const driverPt = { lat: driverCoord[1], lng: driverCoord[0] };
+    const targetPt = { lat: targetCoord[1], lng: targetCoord[0] };
+
     if(!trackMapInstance){
-      trackMapInstance = new mapboxgl.Map({
-        container: 'trackMap',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        accessToken: MAPBOX_TOKEN,
-        center: driverCoord,
-        zoom: 12
+      const platform = new H.service.Platform({ apikey: HERE_API_KEY });
+      const defaultLayers = platform.createDefaultLayers();
+      trackMapInstance = new H.Map(document.getElementById('trackMap'), defaultLayers.vector.normal.map, {
+        center: driverPt, zoom: 12, pixelRatio: window.devicePixelRatio || 1
       });
-      trackMapInstance.on('load', () => {
-        trackMapInstance.addSource('route', { type: 'geojson', data: { type:'Feature', geometry: route.geometry } });
-        trackMapInstance.addLayer({ id:'route', type:'line', source:'route',
-          paint: { 'line-color': '#F5C518', 'line-width': 5, 'line-opacity': 0.9 } });
-        new mapboxgl.Marker({ color:'#0B0B0C' }).setLngLat(pickupCoord).addTo(trackMapInstance);
-        trackMapInstance.driverMarker = new mapboxgl.Marker({ color:'#F5C518' }).setLngLat(driverCoord).addTo(trackMapInstance);
-        const bounds = new mapboxgl.LngLatBounds(driverCoord, driverCoord).extend(pickupCoord);
-        trackMapInstance.fitBounds(bounds, { padding: 50 });
-      });
-      // Corrige un bug classique de Mapbox GL : la carte peut se dessiner en blanc/coupée
-      // si son conteneur n'avait pas encore sa taille définitive au moment de la création
-      // (fréquent sur tablette/PC où la mise en page se stabilise différemment que sur mobile).
-      setTimeout(() => trackMapInstance && trackMapInstance.resize(), 150);
-      window.addEventListener('resize', () => { if(trackMapInstance) trackMapInstance.resize(); });
+      new H.mapevents.Behavior(new H.mapevents.MapEvents(trackMapInstance));
+      window.addEventListener('resize', () => trackMapInstance && trackMapInstance.getViewPort().resize());
+      setTimeout(() => trackMapInstance && trackMapInstance.getViewPort().resize(), 150);
+
+      trackMapInstance.routeLine = new H.map.Polyline(lineString, { style: { lineWidth: 5, strokeColor: '#F5C518' } });
+      trackMapInstance.addObject(trackMapInstance.routeLine);
+      trackMapInstance.addObject(new H.map.Marker(targetPt));
+      trackMapInstance.driverMarker = new H.map.Marker(driverPt);
+      trackMapInstance.addObject(trackMapInstance.driverMarker);
+      trackMapInstance.getViewModel().setLookAtData({ bounds: lineString.getBoundingBox() });
     } else {
-      trackMapInstance.resize();
-      trackMapInstance.driverMarker.setLngLat(driverCoord);
-      if(trackMapInstance.getSource('route')){
-        trackMapInstance.getSource('route').setData({ type:'Feature', geometry: route.geometry });
-      }
+      trackMapInstance.getViewPort().resize();
+      trackMapInstance.driverMarker.setGeometry(driverPt);
+      trackMapInstance.routeLine.setGeometry(lineString);
     }
   }catch(e){ if(waitEl){ waitEl.style.display = ''; } }
 }
@@ -1942,7 +1926,7 @@ function renderTrack(){
   }
 
   if(booking && !past){
-    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || HERE_API_KEY.includes('COLLEZ_ICI')){
       const waitEl = document.getElementById('trackWaitingMsg');
       if(waitEl) waitEl.textContent = t('trackNotConfigured');
     } else {
@@ -2161,13 +2145,73 @@ function renderDriverCourse(){
     state.view = 'driver'; render(); return;
   }
 
+  // On repart toujours d'une carte fraîche : le conteneur #courseMap est recréé à chaque
+  // rendu de cette page, une instance H.Map existante ne doit donc jamais être réutilisée.
+  if(driverCourseMapInstance){ driverCourseMapInstance.dispose(); driverCourseMapInstance = null; }
+
   const status = booking.status || 'pending';
+  const targetAddress = status === 'in_progress' ? booking.arrivee : booking.depart;
   const stageInfo = {
     pending:     { label: t('stagePickup'),    tag: t('stageLabelPending') },
     to_pickup:   { label: t('stageStartRide'), tag: t('stageLabelToPickup') },
     in_progress: { label: t('stageEndRide'),   tag: t('stageLabelInProgress') },
     completed:   { label: '',                  tag: t('stageLabelCompleted') }
   }[status] || { label: t('stagePickup'), tag: t('stageLabelPending') };
+
+  const phoneDigits = (booking.phone || '').replace(/\D/g,'');
+  const whatsappPhone = phoneDigits.startsWith('0') ? '33' + phoneDigits.slice(1) : phoneDigits;
+  const wazeUrl = `https://waze.com/ul?q=${encodeURIComponent(targetAddress)}&navigate=yes`;
+  const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(targetAddress)}`;
+
+  const courseTab = state.driverCourseTab || 'tracking';
+
+  const trackingPanel = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+      <a href="${wazeUrl}" target="_blank" class="ghost-btn" style="flex-direction:column;gap:2px;padding:10px 4px;font-size:10px;" title="${t('openWaze')}">
+        <span style="font-size:18px;">🚗</span>${t('openWaze')}
+      </a>
+      <a href="${gmapsUrl}" target="_blank" class="ghost-btn" style="flex-direction:column;gap:2px;padding:10px 4px;font-size:10px;" title="${t('openGmaps')}">
+        <span style="font-size:18px;">🗺️</span>${t('openGmaps')}
+      </a>
+      <a href="https://wa.me/${whatsappPhone}" target="_blank" class="ghost-btn" style="flex-direction:column;gap:2px;padding:10px 4px;font-size:10px;" title="${t('openWhatsapp')}">
+        <span style="font-size:18px;">💬</span>WhatsApp
+      </a>
+      <a href="tel:${booking.phone}" class="ghost-btn" style="flex-direction:column;gap:2px;padding:10px 4px;font-size:10px;" title="${t('callClient')}">
+        <span style="font-size:18px;">📞</span>${t('callClient')}
+      </a>
+    </div>
+    <div class="course-stage-label">${stageInfo.tag}</div>
+    <div id="courseMap" class="track-map" style="margin-bottom:16px;"></div>
+    <div id="courseStats" style="display:flex;gap:10px;margin-bottom:16px;"></div>
+
+    ${status === 'completed' ? `
+      <div style="text-align:center;color:var(--ink-dim);font-size:13px;">${t('courseCompletedNote')}</div>
+    ` : `
+      <div class="slide-track" id="courseSlideTrack">
+        <div class="slide-fill" id="courseSlideFill"></div>
+        <div class="slide-label" id="courseSlideLabel">${stageInfo.label}</div>
+        <div class="slide-handle" id="courseSlideHandle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+      <div id="courseSlideStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;text-align:center;"></div>
+    `}`;
+
+  const clientPanel = `
+    <div class="driver-legal">
+      <div><span>${t('infoName')}</span>${booking.name || '—'}</div>
+      <div><span>${t('legalPhone')}</span><a href="tel:${booking.phone}">${booking.phone}</a></div>
+      ${booking.email ? `<div><span>${t('legalEmail')}</span><a href="mailto:${booking.email}">${booking.email}</a></div>` : ''}
+      <div><span>${t('departLabel')}</span>${booking.depart}</div>
+      <div><span>${t('arriveeLabel')}</span>${booking.arrivee}</div>
+      <div><span>${t('onDate')}</span>${booking.date} · ${booking.time}</div>
+      ${booking.price ? `<div><span>${t('estimateLabel')}</span>${booking.price} €</div>` : ''}
+      <div><span>${t('trackRefLabel')}</span>${booking.id}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+      <a href="https://wa.me/${whatsappPhone}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
+      <a href="tel:${booking.phone}" class="ghost-btn" style="justify-content:center;display:flex;">📞 ${t('callClient')}</a>
+    </div>`;
 
   app.innerHTML = `
     <div class="container" style="padding-top:28px;">
@@ -2179,48 +2223,46 @@ function renderDriverCourse(){
         </div>
       </div>
 
-      <div class="card" style="margin-top:18px;">
-        <div class="section-title" style="margin-bottom:10px;">
-          ${booking.name ? `👤 ${booking.name}<br>` : ''}
-        </div>
-        <div class="detail" style="font-size:13px;">
-          📞 <a href="tel:${booking.phone}" style="color:inherit;">${booking.phone}</a><br>
-          ${t('from')} : ${booking.depart}<br>
-          ${t('to')} : ${booking.arrivee}<br>
-          ${t('onDate')} ${booking.date} · ${booking.time}
-          ${booking.price ? `<br>${t('estimateLabel')} : ${booking.price} €` : ''}
-        </div>
+      <div class="tabs" id="courseTabs">
+        <button class="tab-btn ${courseTab==='tracking'?'active':''}" data-course-tab="tracking">${t('tabCourseTracking')}</button>
+        <button class="tab-btn ${courseTab==='client'?'active':''}" data-course-tab="client">${t('tabClientInfo')}</button>
+        <div class="tab-indicator" id="courseTabIndicator"></div>
       </div>
 
-      <div class="card" style="margin-top:16px;">
-        <div class="course-stage-label">${stageInfo.tag}</div>
-        <div id="courseMap" class="track-map" style="margin-bottom:16px;"></div>
-        <div id="courseStats" style="display:flex;gap:10px;margin-bottom:16px;"></div>
-
-        ${status === 'completed' ? `
-          <div style="text-align:center;color:var(--ink-dim);font-size:13px;">${t('courseCompletedNote')}</div>
-        ` : `
-          <div class="slide-track" id="courseSlideTrack">
-            <div class="slide-fill" id="courseSlideFill"></div>
-            <div class="slide-label" id="courseSlideLabel">${stageInfo.label}</div>
-            <div class="slide-handle" id="courseSlideHandle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-            </div>
-          </div>
-          <div id="courseSlideStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;text-align:center;"></div>
-        `}
+      <div class="card tab-panel" style="margin-top:16px;">
+        ${courseTab === 'tracking' ? trackingPanel : clientPanel}
       </div>
     </div>
   `;
 
   bindLangSwitch();
+
+  const courseTabsEl = document.getElementById('courseTabs');
+  const courseIndicator = document.getElementById('courseTabIndicator');
+  const positionCourseIndicator = () => {
+    const activeBtn = courseTabsEl.querySelector('.tab-btn.active');
+    if(activeBtn){ courseIndicator.style.left = activeBtn.offsetLeft + 'px'; courseIndicator.style.width = activeBtn.offsetWidth + 'px'; }
+  };
+  requestAnimationFrame(positionCourseIndicator);
+  courseTabsEl.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+      if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
+      if(driverCourseMapInstance){ driverCourseMapInstance.dispose(); driverCourseMapInstance = null; }
+      state.driverCourseTab = btn.dataset.courseTab;
+      render();
+    };
+  });
+
+  if(courseTab !== 'tracking'){ return; }
+
   document.getElementById('back').onclick = () => {
+    if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
+    if(driverCourseMapInstance){ driverCourseMapInstance.dispose(); driverCourseMapInstance = null; }
     state.view = 'driver'; render();
   };
 
-  // Carte : position du chauffeur (mise à jour en direct) + trajet vers la cible actuelle
-  const targetAddress = status === 'in_progress' ? booking.arrivee : booking.depart;
-
+  // Carte : position du chauffeur mise à jour en direct, SANS recréer la carte à chaque
+  // position — on ne fait bouger que le marqueur et la ligne d'itinéraire.
   async function initOrUpdateCourseMap(driverCoord){
     try{
       const targetCoord = await geocodeAddress(targetAddress);
@@ -2232,35 +2274,33 @@ function renderDriverCourse(){
           <div class="stat"><div class="num">${route.min}</div><div class="lbl">${t('trackMinLeft')}</div></div>
         `;
       }
+      const lineString = H.geo.LineString.fromFlexiblePolyline(route.polyline);
+      const driverPt = { lat: driverCoord[1], lng: driverCoord[0] };
+      const targetPt = { lat: targetCoord[1], lng: targetCoord[0] };
+
       if(!driverCourseMapInstance){
-        driverCourseMapInstance = new mapboxgl.Map({
-          container: 'courseMap',
-          style: 'mapbox://styles/mapbox/streets-v12',
-          accessToken: MAPBOX_TOKEN,
-          center: driverCoord,
-          zoom: 12
+        const platform = new H.service.Platform({ apikey: HERE_API_KEY });
+        const defaultLayers = platform.createDefaultLayers();
+        driverCourseMapInstance = new H.Map(document.getElementById('courseMap'), defaultLayers.vector.normal.map, {
+          center: driverPt, zoom: 12, pixelRatio: window.devicePixelRatio || 1
         });
-        driverCourseMapInstance.on('load', () => {
-          driverCourseMapInstance.addSource('route', { type:'geojson', data:{ type:'Feature', geometry: route.geometry } });
-          driverCourseMapInstance.addLayer({ id:'route', type:'line', source:'route',
-            paint:{ 'line-color':'#F5C518', 'line-width':5, 'line-opacity':0.9 } });
-          new mapboxgl.Marker({ color:'#0B0B0C' }).setLngLat(targetCoord).addTo(driverCourseMapInstance);
-          driverCourseMapInstance.driverMarker = new mapboxgl.Marker({ color:'#F5C518' }).setLngLat(driverCoord).addTo(driverCourseMapInstance);
-          const bounds = new mapboxgl.LngLatBounds(driverCoord, driverCoord).extend(targetCoord);
-          driverCourseMapInstance.fitBounds(bounds, { padding: 50 });
-        });
-        setTimeout(() => driverCourseMapInstance && driverCourseMapInstance.resize(), 150);
+        new H.mapevents.Behavior(new H.mapevents.MapEvents(driverCourseMapInstance));
+        setTimeout(() => driverCourseMapInstance && driverCourseMapInstance.getViewPort().resize(), 150);
+
+        driverCourseMapInstance.routeLine = new H.map.Polyline(lineString, { style: { lineWidth: 5, strokeColor: '#F5C518' } });
+        driverCourseMapInstance.addObject(driverCourseMapInstance.routeLine);
+        driverCourseMapInstance.addObject(new H.map.Marker(targetPt));
+        driverCourseMapInstance.driverMarker = new H.map.Marker(driverPt);
+        driverCourseMapInstance.addObject(driverCourseMapInstance.driverMarker);
+        driverCourseMapInstance.getViewModel().setLookAtData({ bounds: lineString.getBoundingBox() });
       } else {
-        driverCourseMapInstance.resize();
-        driverCourseMapInstance.driverMarker.setLngLat(driverCoord);
-        if(driverCourseMapInstance.getSource('route')){
-          driverCourseMapInstance.getSource('route').setData({ type:'Feature', geometry: route.geometry });
-        }
+        driverCourseMapInstance.driverMarker.setGeometry(driverPt);
+        driverCourseMapInstance.routeLine.setGeometry(lineString);
       }
     }catch(e){ /* géocodage/itinéraire indisponible pour le moment */ }
   }
 
-  if(status !== 'completed' && !MAPBOX_TOKEN.includes('COLLEZ_ICI')){
+  if(status !== 'completed' && !HERE_API_KEY.includes('COLLEZ_ICI')){
     if(navigator.geolocation){
       if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
       state.geoWatchId = navigator.geolocation.watchPosition((pos) => {
@@ -2283,7 +2323,7 @@ function renderDriverCourse(){
 
     if(newStatus === 'completed'){
       if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
-      driverCourseMapInstance = null;
+      if(driverCourseMapInstance){ driverCourseMapInstance.dispose(); driverCourseMapInstance = null; }
       if(statusEl) statusEl.textContent = t('courseCompletedNote');
       setTimeout(() => { state.view = 'driver'; state.driverCourseId = null; render(); }, 1200);
     } else {
@@ -2306,14 +2346,13 @@ function renderDriver(){
   const completedList = all.filter(isBookingCompleted).sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
   const upcomingList = all.filter(b => !isBookingCompleted(b)).sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
   const tab = state.driverTab || 'upcoming';
-  const list = tab === 'upcoming' ? upcomingList : completedList;
 
-  const rowHTML = (b) => `
+  const rowHTML = (b, kind) => `
     <div class="booking-row">
       <div class="top">
         <span>${b.date} — ${b.time}</span>
         <span style="display:flex;align-items:center;gap:8px;">
-          <span class="status-chip ${tab === 'upcoming' ? 'upcoming' : 'done'}">${tab === 'upcoming' ? t('trackStatusUpcoming') : t('trackStatusDone')}</span>
+          <span class="status-chip ${kind === 'upcoming' ? 'upcoming' : 'done'}">${kind === 'upcoming' ? t('trackStatusUpcoming') : t('trackStatusDone')}</span>
           ${b.price ? b.price+' €' : ''}
         </span>
       </div>
@@ -2325,9 +2364,35 @@ function renderDriver(){
         ${t('to')} : ${b.arrivee}
         ${b.rating ? `<br>⭐ ${b.rating}/5` : ''}
       </div>
-      ${tab === 'upcoming' ? `<button class="course-link" data-course-id="${b.id}">${t('courseLinkBtn')}</button>` : ''}
+      ${kind === 'upcoming' ? `<button class="course-link" data-course-id="${b.id}">${t('courseLinkBtn')}</button>` : ''}
       <div class="del" data-id="${b.id}" style="margin-top:8px;">${t('delete')}</div>
     </div>`;
+
+  let panelHTML = '';
+  if(tab === 'upcoming'){
+    panelHTML = upcomingList.length ? upcomingList.map(b => rowHTML(b,'upcoming')).join('') : `<div class="empty-state">${t('noBooking')}</div>`;
+  } else if(tab === 'completed'){
+    panelHTML = completedList.length ? completedList.map(b => rowHTML(b,'completed')).join('') : `<div class="empty-state">${t('noBooking')}</div>`;
+  } else if(tab === 'myinfo'){
+    panelHTML = `
+      <div style="margin-bottom:16px;" class="driver-card">
+        ${driverPhotoHTML()}
+        ${vehiclePhotoHTML()}
+        <div class="info">
+          <div class="name">${DRIVER_DISPLAY_NAME}</div>
+          <div class="sub">${COMPANY_NAME}</div>
+        </div>
+      </div>
+      <div class="driver-legal">
+        <div><span>${t('infoName')}</span>${DRIVER_DISPLAY_NAME}</div>
+        <div><span>${t('legalCompany')}</span>${COMPANY_NAME}</div>
+        <div><span>${t('legalSiret')}</span>${COMPANY_SIRET}</div>
+        <div><span>${t('legalAddress')}</span>${DRIVER_ADDRESS}</div>
+        <div><span>${t('legalPhone')}</span><a href="tel:${DRIVER_PHONE_DISPLAY}">${DRIVER_PHONE_DISPLAY}</a></div>
+        <div><span>${t('legalEmail')}</span><a href="mailto:${DRIVER_EMAIL}">${DRIVER_EMAIL}</a></div>
+        <div><span>${t('legalVehicle')}</span>${VEHICLE_MODEL} — ${VEHICLE_PLATE}</div>
+      </div>`;
+  }
 
   app.innerHTML = `
     <div class="container" style="padding-top:28px;">
@@ -2345,11 +2410,12 @@ function renderDriver(){
       <div class="tabs" id="driverTabs">
         <button class="tab-btn ${tab==='upcoming'?'active':''}" data-tab="upcoming">${t('tabUpcoming')} <span class="count">(${upcomingList.length})</span></button>
         <button class="tab-btn ${tab==='completed'?'active':''}" data-tab="completed">${t('tabCompleted')} <span class="count">(${completedList.length})</span></button>
+        <button class="tab-btn ${tab==='myinfo'?'active':''}" data-tab="myinfo">${t('tabMyInfo')}</button>
         <div class="tab-indicator" id="tabIndicator"></div>
       </div>
 
       <div class="card tab-panel" style="margin-top:16px;" id="driverListCard">
-        ${list.length ? list.map(rowHTML).join('') : `<div class="empty-state">${t('noBooking')}</div>`}
+        ${panelHTML}
       </div>
     </div>
   `;
@@ -2369,7 +2435,7 @@ function renderDriver(){
   });
 
   app.querySelectorAll('[data-course-id]').forEach(btn => {
-    btn.onclick = () => { state.driverCourseId = btn.dataset.courseId; state.view = 'driver-course'; render(); };
+    btn.onclick = () => { state.driverCourseId = btn.dataset.courseId; state.driverCourseTab = 'tracking'; state.view = 'driver-course'; render(); };
   });
 
   app.querySelectorAll('.del').forEach(el => {

@@ -394,11 +394,24 @@
   .stat .num{font-family:'Space Grotesk';font-weight:700;font-size:20px;color:var(--ink);}
   .stat .lbl{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.02em;margin-top:2px;}
 
+  .link-inline{background:none;border:none;padding:0;color:var(--ink-dim);text-decoration:underline;cursor:pointer;font-size:12.5px;font-family:'Inter';font-weight:600;}
+  .link-inline:hover{color:var(--ink);}
+  input[readonly]{background:var(--cream-2);color:var(--ink-dim);}
+  .map-back-btn svg{width:18px;height:18px;}
+  .track-waiting-full{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:0 34px;color:rgba(255,255,255,0.75);font-size:14px;line-height:1.6;
+  }
+  .map-driver-mini{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:#fff;}
+  .map-driver-mini .driver-photo,.map-driver-mini .vehicle-photo{width:44px;height:44px;font-size:20px;flex-shrink:0;}
+  .map-driver-mini .nm{font-family:'Space Grotesk';font-weight:700;font-size:14px;text-transform:uppercase;}
+  .map-driver-mini .sub{font-size:11px;color:rgba(255,255,255,0.65);}
+
   /* CARTE PLEIN ÉCRAN — page de suivi de course */
   .fullscreen-map-wrap{
     position:fixed;inset:0;z-index:150;background:var(--ink);
   }
-  .fullscreen-map-wrap .track-map{width:100%;height:100%;margin:0;border-radius:0;border:none;}
+  .fullscreen-map-wrap .track-map{width:100%;height:100%;margin:0;border-radius:0;border:none;background:#1b1b1d;}
   .fullscreen-map-overlay-top{
     position:absolute;top:0;left:0;right:0;z-index:2;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 40px;
     background:linear-gradient(180deg, rgba(11,11,12,0.85), rgba(11,11,12,0));
@@ -470,7 +483,8 @@
     margin-top:10px;padding:12px 14px;background:var(--cream);border:1px dashed var(--line);border-radius:var(--radius-md);
     font-size:11.5px;color:var(--ink-dim);line-height:1.9;
   }
-  .driver-legal span{display:inline-block;min-width:110px;color:var(--ink);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.02em;}
+  .driver-legal div{display:flex;gap:10px;align-items:baseline;}
+  .driver-legal span{display:inline-block;flex:0 0 96px;min-width:96px;color:var(--ink);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.02em;}
   .driver-legal a{color:var(--ink-dim);}
 
   .star-rating{display:flex;gap:6px;justify-content:center;margin:16px 0 6px;}
@@ -557,15 +571,15 @@
 <div id="app"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6OUU9nrwwuAXgaIIQ1Q6wMHPC-K147F3SgyoZkHz_BZh6cI0LXNvpaUXvDYSFaJqg/exec';
+const APPS_SCRIPT_URL = 'COLLEZ_ICI_VOTRE_URL_APPS_SCRIPT';
 // Clé API HERE (Platform.here.com > Projects > votre projet > REST API key)
 const HERE_API_KEY = 'lDqm6cc8GY7_EUpNPhmn9qDIKhbFD1_IYy91h1Q87nk';
 const DRIVER_WHATSAPP = '33695567192';
 // Collez ici l'URL d'une photo de vous et de votre véhicule (hébergées n'importe où : Google Drive en partage public, Imgur, etc.)
 // Laissez tel quel si vous n'en avez pas encore : une icône par défaut s'affichera.
-const DRIVER_PHOTO_URL = 'https://imgur.com/a/PUWgsQO';
-const VEHICLE_PHOTO_URL = 'https://imgur.com/a/fzMh4xt';
-const DRIVER_DISPLAY_NAME = 'prenom et nom';
+const DRIVER_PHOTO_URL = '';
+const VEHICLE_PHOTO_URL = '';
+const DRIVER_DISPLAY_NAME = 'Votre chauffeur';
 const COMPANY_NAME = 'COLLEZ_ICI_NOM_DE_VOTRE_SOCIETE';
 const COMPANY_SIRET = 'COLLEZ_ICI_VOTRE_SIRET';
 const DRIVER_PHONE_DISPLAY = 'COLLEZ_ICI_VOTRE_NUMERO';
@@ -602,7 +616,7 @@ const I18N = {
     trackNoResults: 'Aucune réservation trouvée avec ce numéro.',
     trackResultsTitle: 'Vos réservations',
     trackNotConfigured: "Le suivi n'est pas encore activé sur ce site.",
-    accountBtn: '👤 Mon espace',
+    accountBtn: '👤 Espace client · Suivre ma course',
     accountTitle: 'Mon espace',
     accountIntro: "Entrez le numéro de téléphone utilisé lors de vos réservations pour retrouver l'historique de vos courses.",
     accountPhoneLabel: 'Numéro de téléphone',
@@ -648,6 +662,31 @@ const I18N = {
     myInfoTitle: 'Mes informations',
     clientInfoTitle: 'Informations client',
     infoName: 'Nom',
+    clientSpaceLabel: "Espace client",
+    clientLoginTitle: "Espace client",
+    clientLoginIntro: "Entrez le numéro de téléphone utilisé pour vos réservations afin d'accéder à votre espace client.",
+    clientLoginBtn: "Se connecter",
+    clientFirstNameLabel: "Prénom",
+    clientLastNameLabel: "Nom",
+    clientPhoneLoginLabel: "Téléphone (identifiant de connexion)",
+    rideViewRate: "Voir / Noter →",
+    rideDetailsTitle: "Détails de la course",
+    tabDriverInfo: "Chauffeur",
+    clientStagePending: "En attente du départ du chauffeur",
+    clientStageToPickup: "Votre chauffeur arrive",
+    clientStageInProgress: "Course en cours",
+    clientStageCompleted: "Course terminée",
+    loadingLabel: "Chargement…",
+    helpContactTitle: "Contacter mon chauffeur",
+    ratedLabel: "Votre note",
+    clientHelpQ1: "Comment suivre ma course en direct ?",
+    clientHelpA1: "Dans Réservations > À venir, appuyez sur « Suivre cette course ». La carte s'affiche dès que votre chauffeur démarre sa prise en charge.",
+    clientHelpQ2: "Comment télécharger ma facture ?",
+    clientHelpA2: "Dans Réservations, appuyez sur « Facture (PDF) » sous la course concernée.",
+    clientHelpQ3: "Comment noter mon chauffeur ?",
+    clientHelpA3: "Une fois la course terminée, ouvrez-la depuis l'onglet Terminées puis attribuez de 1 à 5 étoiles.",
+    clientHelpQ4: "Comment contacter mon chauffeur ?",
+    clientHelpA4: "Depuis la page de suivi ou depuis cet onglet Aide, utilisez les boutons WhatsApp ou Appeler.",
     menuInfos: 'Mes infos',
     menuBookings: 'Réservations',
     menuHelp: 'Aide',
@@ -811,7 +850,7 @@ const I18N = {
     trackNoResults: 'No booking found with this number.',
     trackResultsTitle: 'Your bookings',
     trackNotConfigured: "Tracking isn't enabled on this site yet.",
-    accountBtn: '👤 My account',
+    accountBtn: '👤 Client area · Track my ride',
     accountTitle: 'My account',
     accountIntro: "Enter the phone number used for your bookings to find your ride history.",
     accountPhoneLabel: 'Phone number',
@@ -857,6 +896,31 @@ const I18N = {
     myInfoTitle: 'My information',
     clientInfoTitle: 'Client information',
     infoName: 'Name',
+    clientSpaceLabel: "Client area",
+    clientLoginTitle: "Client area",
+    clientLoginIntro: "Enter the phone number used for your bookings to access your client area.",
+    clientLoginBtn: "Log in",
+    clientFirstNameLabel: "First name",
+    clientLastNameLabel: "Last name",
+    clientPhoneLoginLabel: "Phone (login ID)",
+    rideViewRate: "View / Rate →",
+    rideDetailsTitle: "Ride details",
+    tabDriverInfo: "Driver",
+    clientStagePending: "Waiting for the driver to leave",
+    clientStageToPickup: "Your driver is on the way",
+    clientStageInProgress: "Ride in progress",
+    clientStageCompleted: "Ride completed",
+    loadingLabel: "Loading…",
+    helpContactTitle: "Contact my driver",
+    ratedLabel: "Your rating",
+    clientHelpQ1: "How do I follow my ride live?",
+    clientHelpA1: "In Bookings > Upcoming, tap \"Track this ride\". The map appears as soon as your driver starts heading to you.",
+    clientHelpQ2: "How do I download my invoice?",
+    clientHelpA2: "In Bookings, tap \"Invoice (PDF)\" under the ride concerned.",
+    clientHelpQ3: "How do I rate my driver?",
+    clientHelpA3: "Once the ride is completed, open it from the Completed tab then give 1 to 5 stars.",
+    clientHelpQ4: "How do I contact my driver?",
+    clientHelpA4: "From the tracking page or this Help tab, use the WhatsApp or Call buttons.",
     menuInfos: 'My info',
     menuBookings: 'Bookings',
     menuHelp: 'Help',
@@ -1017,9 +1081,13 @@ let state = {
   driverCourseTab: 'tracking',
   driverProfileData: null,
   driverSection: 'reservations',
-  trackResults: null,
-  accountResults: null,
-  pendingTrackRef: null,
+  session: null,
+  bookingsLoaded: false,
+  clientSection: 'reservations',
+  clientTab: 'upcoming',
+  clientProfileData: null,
+  trackBookingId: null,
+  trackTab: 'tracking',
   bookingStep: 1,
   cursorDate: new Date(),
   selectedDate: null,
@@ -1040,13 +1108,168 @@ function pad(n){ return n.toString().padStart(2,'0'); }
 function dateKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function todayKey(){ return dateKey(new Date()); }
 
+// ===== Session (connexion persistante) =====
+const SESSION_KEY = 'vtc_session_v1';
+const LANG_KEY = 'vtc_lang';
+
+function readSession(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }catch(e){ return null; } }
+function writeSession(){
+  try{
+    if(!state.session){ localStorage.removeItem(SESSION_KEY); return; }
+    state.session.nav = {
+      view: state.view,
+      driverSection: state.driverSection, driverTab: state.driverTab,
+      driverCourseId: state.driverCourseId, driverCourseTab: state.driverCourseTab,
+      clientSection: state.clientSection, clientTab: state.clientTab,
+      trackBookingId: state.trackBookingId, trackTab: state.trackTab
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(state.session));
+  }catch(e){}
+}
+function restoreSession(){
+  const s = readSession();
+  if(!s || (s.role !== 'driver' && s.role !== 'client')) return;
+  state.session = s;
+  const n = s.nav || {};
+  ['driverSection','driverTab','driverCourseId','driverCourseTab','clientSection','clientTab','trackBookingId','trackTab'].forEach(k => {
+    if(n[k] !== undefined && n[k] !== null) state[k] = n[k];
+  });
+  if(s.role === 'driver'){
+    state.view = ['driver','driver-course'].includes(n.view) ? n.view : 'driver';
+  } else {
+    state.view = ['account','track','client'].includes(n.view) ? n.view : 'account';
+  }
+}
+function restoreLang(){
+  try{
+    const l = localStorage.getItem(LANG_KEY);
+    if(l === 'fr' || l === 'en'){ state.lang = l; document.documentElement.lang = l; }
+  }catch(e){}
+}
+function doLogout(){
+  stopTrackRefresh();
+  state.session = null;
+  state.clientProfileData = null;
+  state.view = 'client'; state.bookingOpen = false; state.bookingStep = 1; state.selectedDate = null;
+  history.replaceState(null, '', window.location.pathname);
+  render(); // render() efface aussi la session enregistrée
+}
+
+// ===== Utilitaires =====
+// Même logique côté site et côté script Google : chiffres uniquement, 0033 / 33 -> 0
+function normPhone(s){
+  let d = String(s || '').replace(/\D/g, '');
+  if(d.indexOf('0033') === 0) d = '0' + d.slice(4);
+  else if(d.indexOf('33') === 0 && d.length === 11) d = '0' + d.slice(2);
+  return d;
+}
+// Neutralise les caractères permettant d'injecter du HTML dans les données reçues de la feuille
+function cleanText(v){
+  return typeof v === 'string' ? v.replace(/</g,'‹').replace(/>/g,'›').replace(/"/g,'”').replace(/`/g,"'") : v;
+}
+function cleanObj(o){
+  const out = {};
+  Object.keys(o || {}).forEach(k => { out[k] = cleanText(o[k]); });
+  return out;
+}
+function escAttr(v){
+  return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function positionTabIndicator(tabsId, indId){
+  requestAnimationFrame(() => {
+    const tabs = document.getElementById(tabsId), ind = document.getElementById(indId);
+    if(!tabs || !ind) return;
+    const a = tabs.querySelector('.tab-btn.active');
+    if(a){ ind.style.left = a.offsetLeft + 'px'; ind.style.width = a.offsetWidth + 'px'; }
+  });
+}
+function rerenderIfIdle(){
+  const ae = document.activeElement;
+  const typing = ae && ['INPUT','TEXTAREA','SELECT'].includes(ae.tagName);
+  if(typing || state.bookingOpen || ['driver-course','track'].includes(state.view)) return;
+  render();
+}
+function renderLoading(){
+  document.getElementById('app').innerHTML =
+    `<div class="container" style="padding-top:90px;text-align:center;color:var(--ink-dim);font-size:14px;">${t('loadingLabel')}</div>`;
+}
+
+// ===== Données de réservation =====
+function mapRow(r){
+  return {
+    id: cleanText(String(r.id)), date: cleanText(r.date), time: cleanText(r.time),
+    name: cleanText(r.name || ''), phone: cleanText(String(r.phone || '')), email: cleanText(r.email || ''),
+    depart: cleanText(r.depart || ''), arrivee: cleanText(r.arrivee || ''),
+    km: r.km, min: r.min, price: r.price, createdAt: r.createdAt,
+    rating: r.rating || '', status: cleanText(r.status || 'pending')
+  };
+}
+async function refreshBookings(){
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ state.bookingsLoaded = true; return; }
+  const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
+  if(Array.isArray(rows)) state.bookings = rows.map(mapRow);
+  state.bookingsLoaded = true;
+}
+async function loadBookings(){
+  try{ await refreshBookings(); }catch(e){ state.bookingsLoaded = true; }
+  rerenderIfIdle();
+}
+function clientBookings(){
+  if(!state.session || state.session.role !== 'client') return [];
+  const key = normPhone(state.session.phone);
+  return state.bookings.filter(b => normPhone(b.phone) === key);
+}
+async function loadClientProfile(){
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || !state.session || state.session.role !== 'client') return;
+  try{
+    const saved = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=clientProfile&phone=${encodeURIComponent(state.session.phone)}`);
+    if(saved && typeof saved === 'object' && !Array.isArray(saved)) state.clientProfileData = cleanObj(saved);
+  }catch(e){}
+}
+function clientProfileValues(){
+  const p = state.clientProfileData || {};
+  const latest = clientBookings().sort((a,b) => (b.date+b.time).localeCompare(a.date+a.time))[0] || {};
+  const parts = String(latest.name || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: p.firstName ?? (parts[0] || ''),
+    lastName: p.lastName ?? parts.slice(1).join(' '),
+    email: p.email ?? (latest.email || ''),
+    address: p.address ?? '',
+    phone: state.session ? state.session.phone : ''
+  };
+}
+function bookingPrefill(){
+  const out = { name: '', phone: '', email: '' };
+  if(state.session && state.session.role === 'client'){
+    const v = clientProfileValues();
+    out.name = [v.firstName, v.lastName].filter(Boolean).join(' ');
+    out.phone = v.phone; out.email = v.email;
+  }
+  return out;
+}
+function driverPhoneForCall(){
+  const p = driverProfile().phone;
+  return (p && !String(p).includes('COLLEZ_ICI')) ? p : '+' + DRIVER_WHATSAPP;
+}
+
+
 function fetchViaJsonp(url){
   return new Promise((resolve) => {
     const cbName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random()*10000);
     const script = document.createElement('script');
-    window[cbName] = (data) => { resolve(data); delete window[cbName]; script.remove(); };
+    let done = false;
+    const finish = (value) => {
+      if(done) return;
+      done = true;
+      clearTimeout(timer);
+      delete window[cbName];
+      script.remove();
+      resolve(value);
+    };
+    const timer = setTimeout(() => finish(null), 15000); // évite un chargement infini
+    window[cbName] = (data) => finish(data);
     script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${cbName}`;
-    script.onerror = () => { resolve([]); delete window[cbName]; script.remove(); };
+    script.onerror = () => finish(null);
     document.body.appendChild(script);
   });
 }
@@ -1060,21 +1283,6 @@ function postToSheet(payload){
   }).catch(()=>{});
 }
 
-async function loadBookings(silent){
-  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ state.bookings = []; if(!silent) render(); return; }
-  try{
-    const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
-    state.bookings = (rows || []).map(r => ({
-      id: String(r.id), date: r.date, time: r.time, phone: r.phone,
-      depart: r.depart, arrivee: r.arrivee, km: r.km, min: r.min,
-      price: r.price, createdAt: r.createdAt
-    }));
-  }catch(e){ state.bookings = []; }
-  // Ne jamais reconstruire la page pendant que le client remplit le formulaire (étape 2) :
-  // ça effacerait tout ce qu'il vient de taper.
-  const isFillingForm = state.bookingOpen && state.bookingStep === 2;
-  if(!silent && !isFillingForm) render();
-}
 // (Rafraîchissement automatique désactivé à la demande du client — les données
 // se rechargent seulement à l'ouverture de la page ou après une action de l'utilisateur)
 
@@ -1358,7 +1566,7 @@ function renderLangSwitch(){
 }
 function bindLangSwitch(){
   document.querySelectorAll('.lang-btn').forEach(btn=>{
-    btn.onclick = () => { state.lang = btn.dataset.lang; document.documentElement.lang = state.lang; render(); };
+    btn.onclick = () => { state.lang = btn.dataset.lang; document.documentElement.lang = state.lang; try{ localStorage.setItem(LANG_KEY, state.lang); }catch(e){} render(); };
   });
 }
 
@@ -1391,7 +1599,6 @@ function renderHero(){
       <h1>${titleLines}</h1>
       <div class="tagline">${t('tagline')}</div>
       <button class="cta-btn" id="ctaScroll">${t('ctaBtn')}</button>
-      <button class="link-btn" id="trackOpenBtn" style="color:rgba(255,255,255,0.75);text-decoration:underline;">${t('trackBtn')}</button>
       <button class="link-btn" id="accountOpenBtn" style="color:rgba(255,255,255,0.75);text-decoration:underline;">${t('accountBtn')}</button>
     </div>
     <div class="photo-credit">${t('photoCredit')}</div>
@@ -1467,9 +1674,8 @@ function renderClient(){
   setupRevealObserver();
   const openBooking = () => { state.bookingOpen = true; state.bookingStep = 1; render(); };
   document.getElementById('ctaScroll').onclick = openBooking;
-  document.getElementById('trackOpenBtn').onclick = () => { state.view = 'track'; state.trackResults = null; render(); };
-  document.getElementById('accountOpenBtn').onclick = () => { state.view = 'account'; state.accountResults = null; render(); };
-  document.getElementById('footerDriverLink').onclick = (e) => { e.preventDefault(); state.view = 'driver-login'; render(); };
+  document.getElementById('accountOpenBtn').onclick = () => { state.view = 'account'; render(); };
+  document.getElementById('footerDriverLink').onclick = (e) => { e.preventDefault(); state.view = (state.session && state.session.role === 'driver') ? 'driver' : 'driver-login'; render(); };
   document.getElementById('topbarReserve').onclick = openBooking;
 
   if(state.bookingOpen){
@@ -1491,6 +1697,7 @@ function renderBookingOverlay(){
   const step = state.bookingStep;
   const slotsForDay = selected ? bookingsOnDate(selected) : [];
   const lb = state.lastBooking;
+  const bf = bookingPrefill();
 
   let stepContent = '';
   let headerTitle = t('chooseDate');
@@ -1572,19 +1779,19 @@ function renderBookingOverlay(){
         <label>${t('nameLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-          <input type="text" id="f_name" placeholder="${t('namePlaceholder')}">
+          <input type="text" id="f_name" placeholder="${t('namePlaceholder')}" value="${escAttr(bf.name)}">
         </div>
 
         <label>${t('phoneLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
-          <input type="tel" id="f_phone" placeholder="${t('phonePlaceholder')}">
+          <input type="tel" id="f_phone" placeholder="${t('phonePlaceholder')}" value="${escAttr(bf.phone)}">
         </div>
 
         <label>${t('emailLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-          <input type="email" id="f_email" placeholder="${t('emailPlaceholder')}">
+          <input type="email" id="f_email" placeholder="${t('emailPlaceholder')}" value="${escAttr(bf.email)}">
         </div>
       </div>`;
   } else if(step === 3){
@@ -1853,7 +2060,7 @@ let trackMapInstance = null;
 
 function stopTrackRefresh(){
   if(trackRefreshInterval){ clearInterval(trackRefreshInterval); trackRefreshInterval = null; }
-  trackMapInstance = null;
+  if(trackMapInstance){ try{ trackMapInstance.dispose(); }catch(e){} trackMapInstance = null; }
 }
 
 function isBookingPast(b){
@@ -1866,17 +2073,18 @@ function isBookingPast(b){
 // Fusionne le profil enregistré (Google Sheet) avec les constantes par défaut du fichier
 function driverProfile(){
   const p = state.driverProfileData || {};
+  const v = (x) => (x && !String(x).includes('COLLEZ_ICI')) ? x : '';
   return {
-    photo: p.photo || DRIVER_PHOTO_URL,
-    vehiclePhoto: p.vehiclePhoto || VEHICLE_PHOTO_URL,
-    name: p.name || DRIVER_DISPLAY_NAME,
-    company: p.company || COMPANY_NAME,
-    siret: p.siret || COMPANY_SIRET,
-    address: p.address || DRIVER_ADDRESS,
-    phone: p.phone || DRIVER_PHONE_DISPLAY,
-    email: p.email || DRIVER_EMAIL,
-    vehicleModel: p.vehicleModel || VEHICLE_MODEL,
-    vehiclePlate: p.vehiclePlate || VEHICLE_PLATE
+    photo: v(p.photo || DRIVER_PHOTO_URL),
+    vehiclePhoto: v(p.vehiclePhoto || VEHICLE_PHOTO_URL),
+    name: v(p.name || DRIVER_DISPLAY_NAME),
+    company: v(p.company || COMPANY_NAME),
+    siret: v(p.siret || COMPANY_SIRET),
+    address: v(p.address || DRIVER_ADDRESS),
+    phone: v(p.phone || DRIVER_PHONE_DISPLAY),
+    email: v(p.email || DRIVER_EMAIL),
+    vehicleModel: v(p.vehicleModel || VEHICLE_MODEL),
+    vehiclePlate: v(p.vehiclePlate || VEHICLE_PLATE)
   };
 }
 
@@ -1884,7 +2092,7 @@ async function loadDriverProfile(){
   if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')) return;
   try{
     const saved = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=profile`);
-    if(saved) state.driverProfileData = saved;
+    if(saved && typeof saved === 'object' && !Array.isArray(saved)) state.driverProfileData = cleanObj(saved);
   }catch(e){ /* pas de profil enregistré pour le moment */ }
 }
 
@@ -1902,6 +2110,7 @@ function vehiclePhotoHTML(){
 }
 
 async function refreshLiveTracking(booking){
+  if(state.view !== 'track') return;
   const statEl = document.getElementById('trackStats');
   const waitEl = document.getElementById('trackWaitingMsg');
   const mapEl = document.getElementById('trackMap');
@@ -1946,12 +2155,12 @@ async function refreshLiveTracking(booking){
         center: driverPt, zoom: 12, pixelRatio: window.devicePixelRatio || 1
       });
       new H.mapevents.Behavior(new H.mapevents.MapEvents(trackMapInstance));
-      window.addEventListener('resize', () => trackMapInstance && trackMapInstance.getViewPort().resize());
       setTimeout(() => trackMapInstance && trackMapInstance.getViewPort().resize(), 150);
 
       trackMapInstance.routeLine = new H.map.Polyline(lineString, { style: { lineWidth: 5, strokeColor: '#F5C518' } });
       trackMapInstance.addObject(trackMapInstance.routeLine);
-      trackMapInstance.addObject(new H.map.Marker(targetPt));
+      trackMapInstance.targetMarker = new H.map.Marker(targetPt);
+      trackMapInstance.addObject(trackMapInstance.targetMarker);
       trackMapInstance.driverMarker = new H.map.Marker(driverPt);
       trackMapInstance.addObject(trackMapInstance.driverMarker);
       trackMapInstance.getViewModel().setLookAtData({ bounds: lineString.getBoundingBox() });
@@ -1959,6 +2168,7 @@ async function refreshLiveTracking(booking){
       trackMapInstance.getViewPort().resize();
       trackMapInstance.driverMarker.setGeometry(driverPt);
       trackMapInstance.routeLine.setGeometry(lineString);
+      trackMapInstance.targetMarker.setGeometry(targetPt);
     }
   }catch(e){ if(waitEl){ waitEl.style.display = ''; } }
 }
@@ -1969,142 +2179,183 @@ function renderStars(container, currentValue){
   ).join('');
 }
 
+function clientStageText(status){
+  return ({
+    pending: t('clientStagePending'),
+    to_pickup: t('clientStageToPickup'),
+    in_progress: t('clientStageInProgress'),
+    completed: t('clientStageCompleted')
+  })[status || 'pending'] || t('clientStagePending');
+}
+
+async function pollTrack(booking){
+  if(state.view !== 'track') return;
+  try{
+    const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
+    if(Array.isArray(rows)){
+      const r = rows.find(x => String(x.id) === String(booking.id));
+      if(r){
+        const ns = cleanText(r.status || 'pending');
+        const old = booking.status || 'pending';
+        booking.status = ns;
+        if(r.rating) booking.rating = r.rating;
+        if(ns === 'completed'){ stopTrackRefresh(); state.trackTab = 'details'; render(); return; }
+        if(ns !== old){
+          const pill = document.getElementById('trackStagePill');
+          if(pill) pill.textContent = clientStageText(ns);
+        }
+      }
+    }
+  }catch(e){ /* on réessaiera au prochain cycle */ }
+  refreshLiveTracking(booking);
+}
+
+function rideDetailsHTML(booking, completed){
+  const p = driverProfile();
+  const rating = parseInt(booking.rating, 10) || 0;
+  let ratingBlock = '';
+  if(completed){
+    ratingBlock = rating
+      ? `<div class="roadline" style="margin:22px 0 10px;"></div>
+         <div style="text-align:center;font-family:'Space Grotesk';font-weight:700;font-size:14px;text-transform:uppercase;">${t('ratedLabel')}</div>
+         <div class="star-rating">${[1,2,3,4,5].map(n => `<span class="star ${n <= rating ? 'filled' : ''}">★</span>`).join('')}</div>`
+      : `<div class="roadline" style="margin:22px 0 10px;"></div>
+         <div style="text-align:center;font-family:'Space Grotesk';font-weight:700;font-size:14px;text-transform:uppercase;">${t('trackRateTitle')}</div>
+         <div class="star-rating" id="starRating"></div>
+         <button class="primary-btn" id="submitRatingBtn" disabled>${t('trackRateSubmit')}</button>
+         <div class="profile-save-status" id="ratingStatus"></div>`;
+  }
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+      <div>
+        <div style="font-family:'Space Grotesk';font-weight:700;font-size:16px;">${booking.date} — ${booking.time}</div>
+        <div style="color:var(--ink-dim);font-size:12.5px;margin-top:4px;line-height:1.6;">
+          ${t('from')} : ${booking.depart}<br>${t('to')} : ${booking.arrivee}
+          ${booking.price ? `<br>${t('estimateLabel')} : ${booking.price} €` : ''}
+          <br>🎫 ${booking.id}
+        </div>
+      </div>
+      <span class="status-chip ${completed ? 'done' : 'upcoming'}">${completed ? t('trackStatusDone') : t('trackStatusUpcoming')}</span>
+    </div>
+
+    <div style="margin-top:16px;" class="driver-card">
+      ${driverPhotoHTML()}
+      ${vehiclePhotoHTML()}
+      <div class="info">
+        <div class="name">${p.name}</div>
+        <div class="sub">${t('trackDriverSub')}</div>
+      </div>
+    </div>
+    <div class="driver-legal">
+      ${p.company ? `<div><span>${t('legalCompany')}</span>${p.company}</div>` : ''}
+      ${p.siret ? `<div><span>${t('legalSiret')}</span>${p.siret}</div>` : ''}
+      ${(p.vehicleModel || p.vehiclePlate) ? `<div><span>${t('legalVehicle')}</span>${[p.vehicleModel, p.vehiclePlate].filter(Boolean).join(' — ')}</div>` : ''}
+      <div><span>${t('legalPhone')}</span><a href="tel:${driverPhoneForCall()}">${p.phone || driverPhoneForCall()}</a></div>
+      ${p.email ? `<div><span>${t('legalEmail')}</span><a href="mailto:${p.email}">${p.email}</a></div>` : ''}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+      <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
+      <a href="tel:${driverPhoneForCall()}" class="ghost-btn" style="justify-content:center;display:flex;">📞 ${t('callClient')}</a>
+    </div>
+    <button class="ghost-btn" id="invoiceBtn" style="width:100%;margin-top:10px;justify-content:center;display:flex;">${t('accountDownloadInvoice')}</button>
+    ${ratingBlock}`;
+}
+
 function renderTrack(){
   const app = document.getElementById('app');
-  const results = state.trackResults;
-  const booking = (results && results.length) ? results[0] : null;
-  const past = booking ? isBookingPast(booking) : false;
+  stopTrackRefresh();
+  const booking = state.bookings.find(b => b.id === state.trackBookingId);
+  if(!state.session || state.session.role !== 'client' || !booking || normPhone(booking.phone) !== normPhone(state.session.phone)){
+    state.view = 'account'; render(); return;
+  }
+  const completed = isBookingCompleted(booking);
+  const tab = (completed || state.trackTab === 'details') ? 'details' : 'tracking';
+  const goBack = () => { stopTrackRefresh(); state.view = 'account'; render(); };
+  const p = driverProfile();
 
+  if(tab === 'tracking'){
+    // Suivi : carte plein écran, comme côté chauffeur
+    app.innerHTML = `
+      <div class="fullscreen-map-wrap">
+        <div id="trackMap" class="track-map" style="display:none;"></div>
+        <div id="trackWaitingMsg" class="track-waiting-full">${t('trackWaitingLive')}</div>
+
+        <div class="fullscreen-map-overlay-top">
+          <button class="map-back-btn" id="back" aria-label="${t('back')}">${iconBack()}</button>
+          <span class="map-stage-pill" id="trackStagePill">${clientStageText(booking.status)}</span>
+          <button class="map-back-btn" id="toDetailsTab" aria-label="${t('tabDriverInfo')}">${iconUser()}</button>
+        </div>
+
+        <div class="fullscreen-map-overlay-bottom">
+          <div class="map-stats-row" id="trackStats"></div>
+          <div class="map-driver-mini">
+            ${driverPhotoHTML()}${vehiclePhotoHTML()}
+            <div><div class="nm">${p.name || t('trackDriverSub')}</div><div class="sub">${[p.vehicleModel, p.vehiclePlate].filter(Boolean).join(' — ')}</div></div>
+          </div>
+          <div class="map-quick-actions" style="grid-template-columns:repeat(2,1fr);margin-bottom:0;">
+            <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank"><span style="font-size:17px;">💬</span>WhatsApp</a>
+            <a href="tel:${driverPhoneForCall()}"><span style="font-size:17px;">📞</span>${t('callClient')}</a>
+          </div>
+        </div>
+      </div>`;
+
+    document.getElementById('back').onclick = goBack;
+    document.getElementById('toDetailsTab').onclick = () => { stopTrackRefresh(); state.trackTab = 'details'; render(); };
+
+    const waitEl = document.getElementById('trackWaitingMsg');
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || HERE_API_KEY.includes('COLLEZ_ICI')){
+      waitEl.textContent = t('trackNotConfigured');
+      return;
+    }
+    refreshLiveTracking(booking);
+    trackRefreshInterval = setInterval(() => pollTrack(booking), 15000);
+    return;
+  }
+
+  // Détails : fiche chauffeur, facture, note
   app.innerHTML = `
     <div class="container" style="padding-top:28px;">
       <div class="toprow" style="padding-top:0;">
-        <h2>${t('trackTitle')}</h2>
+        <h2>${completed ? t('rideDetailsTitle') : t('trackTitle')}</h2>
         <div style="display:flex;gap:8px;align-items:center;">
           ${renderLangSwitch()}
           <button class="ghost-btn" id="back">${t('back')}</button>
         </div>
       </div>
-      <div class="card" style="margin-top:18px;">
-        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('trackIntro')}</div>
-        <label>${t('trackRefLabel')}</label>
-        <div class="field">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
-          <input type="text" id="trackRef" placeholder="${t('trackRefPlaceholder')}" autocapitalize="none" value="${booking ? booking.id : (state.pendingTrackRef || '')}">
-        </div>
-        <button class="primary-btn" id="trackSearchBtn">${t('trackSearchBtn')}</button>
-        <div id="trackStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
-      </div>
+      ${completed ? '' : `
+      <div class="tabs" id="trackTabs">
+        <button class="tab-btn" data-track-tab="tracking">${t('tabCourseTracking')}</button>
+        <button class="tab-btn active" data-track-tab="details">${t('tabDriverInfo')}</button>
+        <div class="tab-indicator" id="trackTabIndicator"></div>
+      </div>`}
+      <div class="card tab-panel" style="margin-top:16px;">${rideDetailsHTML(booking, completed)}</div>
+    </div>`;
 
-      ${results && !booking ? `<div class="card" style="margin-top:16px;"><div class="empty-state">${t('trackNoResults')}</div></div>` : ''}
-
-      ${booking ? `
-      <div class="card" style="margin-top:16px;">
-        <div class="track-summary">
-          <div>
-            <div style="font-family:'Space Grotesk';font-weight:700;font-size:16px;">${booking.date} — ${booking.time}</div>
-            <div style="color:var(--ink-dim);font-size:12.5px;margin-top:4px;">
-              ${t('from')} : ${booking.depart}<br>${t('to')} : ${booking.arrivee}
-            </div>
-          </div>
-          <span class="badge">${past ? t('trackStatusDone') : t('trackStatusUpcoming')}</span>
-        </div>
-
-        <div style="margin-top:16px;" class="driver-card">
-          ${driverPhotoHTML()}
-          ${vehiclePhotoHTML()}
-          <div class="info">
-            <div class="name">${driverProfile().name}</div>
-            <div class="sub">${t('trackDriverSub')}</div>
-          </div>
-        </div>
-        <div class="driver-legal">
-          <div><span>${t('legalCompany')}</span>${driverProfile().company}</div>
-          <div><span>${t('legalSiret')}</span>${driverProfile().siret}</div>
-          <div><span>${t('legalVehicle')}</span>${driverProfile().vehicleModel} — ${driverProfile().vehiclePlate}</div>
-          <div><span>${t('legalPhone')}</span><a href="tel:${driverProfile().phone}">${driverProfile().phone}</a></div>
-          <div><span>${t('legalEmail')}</span><a href="mailto:${driverProfile().email}">${driverProfile().email}</a></div>
-        </div>
-
-        ${!past ? `
-          <div id="trackMap" class="track-map" style="display:none;"></div>
-          <div class="track-live-stats" id="trackStats"></div>
-          <div id="trackWaitingMsg" class="track-waiting">${t('trackWaitingLive')}</div>
-        ` : ''}
-
-        ${past ? `
-          <div class="roadline" style="margin:22px 0 6px;"></div>
-          ${booking.rating ? `
-            <div style="text-align:center;">
-              <div class="star-rating">${[1,2,3,4,5].map(n=>`<span class="star ${n<=booking.rating?'filled':''}">★</span>`).join('')}</div>
-              <div style="font-size:12.5px;color:var(--ink-dim);">${t('trackRateThanks')}</div>
-            </div>
-          ` : `
-            <div style="text-align:center;font-family:'Space Grotesk';font-weight:700;font-size:14px;text-transform:uppercase;">${t('trackRateTitle')}</div>
-            <div class="star-rating" id="starRating"></div>
-            <button class="primary-btn" id="submitRatingBtn" disabled>${t('trackRateSubmit')}</button>
-            <div id="rateStatus" style="text-align:center;font-size:12px;color:var(--ink-dim);margin-top:8px;"></div>
-          `}
-        ` : ''}
-      </div>` : ''}
-    </div>
-  `;
   bindLangSwitch();
-  stopTrackRefresh();
-
-  document.getElementById('back').onclick = () => {
-    stopTrackRefresh();
-    history.replaceState(null, '', window.location.pathname);
-    state.view = 'client'; state.trackResults = null; render();
-  };
-
-  document.getElementById('trackSearchBtn').onclick = async () => {
-    const ref = document.getElementById('trackRef').value.trim();
-    const statusEl = document.getElementById('trackStatus');
-    if(!ref) return;
-    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('trackNotConfigured'); return; }
-    statusEl.textContent = t('trackSearching');
-    try{
-      const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
-      const normalize = s => (s || '').toString().trim().toLowerCase();
-      const matches = (rows || []).filter(r => normalize(r.id) === normalize(ref));
-      state.trackResults = matches.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
-      statusEl.textContent = '';
-      render();
-    }catch(e){
-      statusEl.textContent = t('trackNoResults');
-    }
-  };
-
-  if(state.pendingTrackRef && !booking){
-    state.pendingTrackRef = null;
-    document.getElementById('trackSearchBtn').click();
-  }
-
-  if(booking && !past){
-    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || HERE_API_KEY.includes('COLLEZ_ICI')){
-      const waitEl = document.getElementById('trackWaitingMsg');
-      if(waitEl) waitEl.textContent = t('trackNotConfigured');
-    } else {
-      refreshLiveTracking(booking);
-      trackRefreshInterval = setInterval(() => refreshLiveTracking(booking), 15000);
-    }
-  }
-
-  if(booking && past && !booking.rating){
-    let selected = 0;
-    const starEl = document.getElementById('starRating');
-    renderStars(starEl, 0);
-    starEl.querySelectorAll('.star').forEach(star => {
-      star.onclick = () => {
-        selected = parseInt(star.dataset.val);
-        renderStars(starEl, selected);
-        starEl.querySelectorAll('.star').forEach(s => { s.onclick = star.onclick; });
-        document.getElementById('submitRatingBtn').disabled = false;
-      };
+  document.getElementById('back').onclick = goBack;
+  if(!completed){
+    positionTabIndicator('trackTabs', 'trackTabIndicator');
+    app.querySelectorAll('[data-track-tab]').forEach(btn => {
+      btn.onclick = () => { state.trackTab = btn.dataset.trackTab; render(); };
     });
-    document.getElementById('submitRatingBtn').onclick = async () => {
-      const rateStatus = document.getElementById('rateStatus');
-      if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ rateStatus.textContent = t('trackNotConfigured'); return; }
+  }
+  document.getElementById('invoiceBtn').onclick = () => downloadReceipt(booking);
+
+  const starEl = document.getElementById('starRating');
+  if(starEl){
+    let selected = 0;
+    const submitBtn = document.getElementById('submitRatingBtn');
+    renderStars(starEl, 0);
+    starEl.onclick = (e) => {
+      const s = e.target.closest('.star');
+      if(!s) return;
+      selected = parseInt(s.dataset.val, 10);
+      renderStars(starEl, selected);
+      submitBtn.disabled = false;
+    };
+    submitBtn.onclick = async () => {
+      if(!selected) return;
       await postToSheet({ action: 'rate', id: booking.id, rating: selected });
       booking.rating = selected;
       render();
@@ -2112,107 +2363,216 @@ function renderTrack(){
   }
 }
 
+// ===== Espace client : connexion par numéro de téléphone =====
 function renderAccount(){
+  if(!state.session || state.session.role !== 'client') renderClientLogin();
+  else renderClientSpace();
+}
+
+function renderClientLogin(){
   const app = document.getElementById('app');
-  const results = state.accountResults;
-  const nowStr = new Date().toISOString().slice(0,16);
-
-  let upcoming = [], past = [];
-  if(results){
-    results.forEach(b => {
-      const dt = `${b.date}T${b.time || '00:00'}`;
-      if(dt >= nowStr) upcoming.push(b); else past.push(b);
-    });
-    upcoming.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
-    past.sort((a,b) => (b.date+b.time).localeCompare(a.date+a.time));
-  }
-
-  const rideRow = (b, isPast) => `
-    <div class="booking-row">
-      <div class="top"><span>${b.date} — ${b.time}</span><span>${b.price ? b.price+' €' : ''}</span></div>
-      <div class="detail">
-        ${t('from')} : ${b.depart}<br>
-        ${t('to')} : ${b.arrivee}
-        ${isPast && b.rating ? `<br>⭐ ${b.rating}/5` : ''}
-      </div>
-      <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
-        <button class="edit-link" data-invoice-id="${b.id}" style="padding:0;">${t('accountDownloadInvoice')}</button>
-        ${!isPast ? `<a class="edit-link" href="#" data-view-ref="${b.id}">${t('accountViewRide')}</a>` : ''}
-      </div>
-    </div>`;
-
   app.innerHTML = `
     <div class="container" style="padding-top:28px;">
       <div class="toprow" style="padding-top:0;">
-        <h2>${t('accountTitle')}</h2>
+        <h2>${t('clientLoginTitle')}</h2>
         <div style="display:flex;gap:8px;align-items:center;">
           ${renderLangSwitch()}
           <button class="ghost-btn" id="back">${t('back')}</button>
         </div>
       </div>
       <div class="card" style="margin-top:18px;">
-        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('accountIntro')}</div>
+        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('clientLoginIntro')}</div>
         <label>${t('accountPhoneLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
-          <input type="tel" id="accountPhone" placeholder="06 12 34 56 78">
+          <input type="tel" id="loginPhone" placeholder="06 12 34 56 78" autocomplete="tel">
         </div>
-        <button class="primary-btn" id="accountSearchBtn">${t('accountSearchBtn')}</button>
-        <div id="accountStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
+        <button class="primary-btn" id="clientLoginBtn">${t('clientLoginBtn')}</button>
+        <div id="loginStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
       </div>
-
-      ${results ? `
-      <div class="card" style="margin-top:16px;">
-        <div class="section-title">${t('accountUpcoming')}</div>
-        ${upcoming.length ? upcoming.map(b => rideRow(b, false)).join('') : `<div class="empty-state">${t('accountNoUpcoming')}</div>`}
-      </div>
-      <div class="card" style="margin-top:16px;">
-        <div class="section-title">${t('accountPast')}</div>
-        ${past.length ? past.map(b => rideRow(b, true)).join('') : `<div class="empty-state">${t('accountNoPast')}</div>`}
-      </div>` : ''}
-    </div>
-  `;
-
+    </div>`;
   bindLangSwitch();
-  document.getElementById('back').onclick = () => {
-    history.replaceState(null, '', window.location.pathname);
-    state.view = 'client'; state.accountResults = null; render();
-  };
+  document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.view = 'client'; render(); };
 
-  document.getElementById('accountSearchBtn').onclick = async () => {
-    const phone = document.getElementById('accountPhone').value.trim();
-    const statusEl = document.getElementById('accountStatus');
+  const input = document.getElementById('loginPhone');
+  const statusEl = document.getElementById('loginStatus');
+  const doLogin = async () => {
+    const phone = input.value.trim();
     if(!phone) return;
     if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('trackNotConfigured'); return; }
     statusEl.textContent = t('trackSearching');
-    try{
-      const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
-      const normalize = s => (s || '').toString().replace(/\s+/g,'');
-      const matches = (rows || []).filter(r => normalize(r.phone) === normalize(phone));
-      state.accountResults = matches;
-      statusEl.textContent = '';
-      render();
-    }catch(e){
-      statusEl.textContent = t('trackNoResults');
-    }
+    try{ await refreshBookings(); }catch(e){}
+    const key = normPhone(phone);
+    if(!state.bookings.some(b => normPhone(b.phone) === key)){ statusEl.textContent = t('trackNoResults'); return; }
+    state.session = { role: 'client', phone };
+    state.clientSection = 'reservations'; state.clientTab = 'upcoming'; state.clientProfileData = null;
+    await loadClientProfile();
+    render();
   };
+  document.getElementById('clientLoginBtn').onclick = doLogin;
+  input.addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
+}
 
-  if(results){
-    app.querySelectorAll('[data-invoice-id]').forEach(btn => {
-      btn.onclick = () => {
-        const booking = results.find(b => b.id === btn.dataset.invoiceId);
-        if(booking) downloadReceipt(booking);
-      };
+function clientReservationsPanel(mine){
+  const completedList = mine.filter(isBookingCompleted).sort((a,b) => (b.date+b.time).localeCompare(a.date+a.time));
+  const upcomingList = mine.filter(b => !isBookingCompleted(b)).sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+  const tab = state.clientTab === 'completed' ? 'completed' : 'upcoming';
+  const list = tab === 'upcoming' ? upcomingList : completedList;
+
+  const rowHTML = (b) => `
+    <div class="booking-row">
+      <div class="top">
+        <span>${b.date} — ${b.time}</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="status-chip ${tab === 'upcoming' ? 'upcoming' : 'done'}">${tab === 'upcoming' ? t('trackStatusUpcoming') : t('trackStatusDone')}</span>
+          ${b.price ? b.price + ' €' : ''}
+        </span>
+      </div>
+      <div class="detail">
+        ${t('from')} : ${b.depart}<br>
+        ${t('to')} : ${b.arrivee}<br>
+        🎫 ${b.id}${b.rating ? `<br>⭐ ${b.rating}/5` : ''}
+      </div>
+      <button class="course-link" data-track-id="${b.id}">${tab === 'upcoming' ? t('courseLinkBtn') : t('rideViewRate')}</button>
+      <div style="margin-top:8px;"><button class="link-inline" data-invoice-id="${b.id}">${t('accountDownloadInvoice')}</button></div>
+    </div>`;
+
+  return `
+    <div class="tabs" id="clientTabs">
+      <button class="tab-btn ${tab==='upcoming'?'active':''}" data-tab="upcoming">${iconClock('sub-tab-icon')}${t('tabUpcoming')} <span class="count">(${upcomingList.length})</span></button>
+      <button class="tab-btn ${tab==='completed'?'active':''}" data-tab="completed">${iconCheckCircle('sub-tab-icon')}${t('tabCompleted')} <span class="count">(${completedList.length})</span></button>
+      <div class="tab-indicator" id="clientTabIndicator"></div>
+    </div>
+    <div class="card tab-panel" style="margin-top:16px;">
+      ${list.length ? list.map(rowHTML).join('') : `<div class="empty-state">${t('noBooking')}</div>`}
+    </div>
+    <button class="primary-btn" id="newBookingBtn">${t('newBooking')}</button>`;
+}
+
+function clientInfoPanel(){
+  const v = clientProfileValues();
+  const icoPhone = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>`;
+  const icoMail = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`;
+  const icoPin = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/></svg>`;
+  return `
+    <label>${t('clientFirstNameLabel')}</label>
+    <div class="field">${iconUser()}<input type="text" id="cp_firstName" value="${escAttr(v.firstName)}" autocomplete="given-name"></div>
+
+    <label>${t('clientLastNameLabel')}</label>
+    <div class="field">${iconUser()}<input type="text" id="cp_lastName" value="${escAttr(v.lastName)}" autocomplete="family-name"></div>
+
+    <label>${t('clientPhoneLoginLabel')}</label>
+    <div class="field">${icoPhone}<input type="tel" id="cp_phone" value="${escAttr(v.phone)}" readonly></div>
+
+    <label>${t('profileEmailLabel')}</label>
+    <div class="field">${icoMail}<input type="email" id="cp_email" value="${escAttr(v.email)}" autocomplete="email"></div>
+
+    <label>${t('profileAddressLabel')}</label>
+    <div class="field">${icoPin}<input type="text" id="cp_address" value="${escAttr(v.address)}" autocomplete="street-address"></div>
+
+    <button class="primary-btn" id="clientProfileSaveBtn">${t('profileSaveBtn')}</button>
+    <div class="profile-save-status" id="clientProfileStatus"></div>`;
+}
+
+function clientHelpPanel(){
+  const items = [
+    [t('clientHelpQ1'), t('clientHelpA1')],
+    [t('clientHelpQ2'), t('clientHelpA2')],
+    [t('clientHelpQ3'), t('clientHelpA3')],
+    [t('clientHelpQ4'), t('clientHelpA4')]
+  ];
+  return `
+    <div class="card" style="margin-top:16px;">
+      <div class="section-title">${t('helpTitle')}</div>
+      ${items.map(([q,a]) => `<div class="help-item"><div class="q">${q}</div><div class="a">${a}</div></div>`).join('')}
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <div class="section-title">${t('helpContactTitle')}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
+        <a href="tel:${driverPhoneForCall()}" class="ghost-btn" style="justify-content:center;display:flex;">📞 ${t('callClient')}</a>
+      </div>
+    </div>`;
+}
+
+function renderClientSpace(){
+  const app = document.getElementById('app');
+  const section = state.clientSection || 'reservations';
+  const mine = clientBookings();
+  const titles = { infos: t('menuInfos'), reservations: t('menuBookings'), help: t('menuHelp') };
+
+  let bodyHTML = '';
+  if(section === 'reservations') bodyHTML = clientReservationsPanel(mine);
+  else if(section === 'infos') bodyHTML = `<div class="card" style="margin-top:16px;">${clientInfoPanel()}</div>`;
+  else bodyHTML = clientHelpPanel();
+
+  app.innerHTML = `
+    <div class="container driver-shell" style="padding-top:28px;">
+      <div class="toprow" style="padding-top:0;">
+        <div>
+          <div class="eyebrow" style="margin-bottom:4px;">${t('clientSpaceLabel')}</div>
+          <h2>${titles[section] || titles.reservations}</h2>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${renderLangSwitch()}
+          <button class="logout-btn" id="logoutBtn" title="${t('logoutLabel')}" aria-label="${t('logoutLabel')}">${iconLogout()}</button>
+        </div>
+      </div>
+      ${bodyHTML}
+    </div>
+
+    <div class="bottom-nav">
+      <button class="bottom-nav-item ${section==='infos'?'active':''}" data-section="infos">${iconUser()}${t('menuInfos')}</button>
+      <button class="bottom-nav-item ${section==='reservations'?'active':''}" data-section="reservations">${iconList()}${t('menuBookings')}</button>
+      <button class="bottom-nav-item ${section==='help'?'active':''}" data-section="help">${iconHelp()}${t('menuHelp')}</button>
+    </div>`;
+
+  bindLangSwitch();
+  document.getElementById('logoutBtn').onclick = () => { if(confirm(t('confirmLogout'))) doLogout(); };
+  app.querySelectorAll('.bottom-nav-item').forEach(btn => {
+    btn.onclick = () => { state.clientSection = btn.dataset.section; render(); };
+  });
+
+  if(section === 'reservations'){
+    positionTabIndicator('clientTabs', 'clientTabIndicator');
+    app.querySelectorAll('#clientTabs .tab-btn').forEach(btn => {
+      btn.onclick = () => { state.clientTab = btn.dataset.tab; render(); };
     });
-    app.querySelectorAll('[data-view-ref]').forEach(link => {
-      link.onclick = (e) => {
-        e.preventDefault();
+    app.querySelectorAll('[data-track-id]').forEach(btn => {
+      btn.onclick = () => {
+        const b = state.bookings.find(x => x.id === btn.dataset.trackId);
+        state.trackBookingId = btn.dataset.trackId;
+        state.trackTab = (b && isBookingCompleted(b)) ? 'details' : 'tracking';
         state.view = 'track';
-        state.trackResults = null;
-        state.pendingTrackRef = link.dataset.viewRef;
         render();
       };
     });
+    app.querySelectorAll('[data-invoice-id]').forEach(btn => {
+      btn.onclick = () => {
+        const b = state.bookings.find(x => x.id === btn.dataset.invoiceId);
+        if(b) downloadReceipt(b);
+      };
+    });
+    document.getElementById('newBookingBtn').onclick = () => {
+      state.view = 'client'; state.bookingOpen = true; state.bookingStep = 1; render();
+    };
+  }
+
+  if(section === 'infos'){
+    document.getElementById('clientProfileSaveBtn').onclick = async () => {
+      const statusEl = document.getElementById('clientProfileStatus');
+      const profile = {
+        firstName: document.getElementById('cp_firstName').value.trim(),
+        lastName: document.getElementById('cp_lastName').value.trim(),
+        email: document.getElementById('cp_email').value.trim(),
+        address: document.getElementById('cp_address').value.trim()
+      };
+      if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('profileNotConfigured'); return; }
+      statusEl.textContent = t('profileSaving');
+      state.clientProfileData = profile;
+      await postToSheet({ action: 'updateClientProfile', phone: state.session.phone, profile });
+      statusEl.textContent = t('profileSaved');
+    };
   }
 }
 
@@ -2241,7 +2601,7 @@ function renderDriverLogin(){
   document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.view='client'; render(); };
   document.getElementById('loginBtn').onclick = () => {
     const username = document.getElementById('username').value.trim();
-    if(username === DRIVER_USERNAME && document.getElementById('pw').value === DRIVER_PASSWORD){ state.view = 'driver'; render(); }
+    if(username === DRIVER_USERNAME && document.getElementById('pw').value === DRIVER_PASSWORD){ state.session = { role: 'driver' }; state.view = 'driver'; render(); }
     else{ document.getElementById('pwError').style.display = 'block'; }
   };
 }
@@ -2554,37 +2914,37 @@ function renderDriverInfoPanel(){
       ${vehiclePhotoHTML()}
     </div>
     <label>${t('profilePhotoLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l5-4 4 3 3-2 4 3"/></svg><input type="text" id="pf_photo" value="${p.photo || ''}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l5-4 4 3 3-2 4 3"/></svg><input type="text" id="pf_photo" value="${escAttr(p.photo)}"></div>
 
     <label>${t('profileVehiclePhotoLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l5-4 4 3 3-2 4 3"/></svg><input type="text" id="pf_vehiclePhoto" value="${p.vehiclePhoto || ''}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l5-4 4 3 3-2 4 3"/></svg><input type="text" id="pf_vehiclePhoto" value="${escAttr(p.vehiclePhoto)}"></div>
 
     <label>${t('profileNameLabel')}</label>
-    <div class="field">${iconUser()}<input type="text" id="pf_name" value="${p.name}"></div>
+    <div class="field">${iconUser()}<input type="text" id="pf_name" value="${escAttr(p.name)}"></div>
 
     <label>${t('profileCompanyLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3"/></svg><input type="text" id="pf_company" value="${p.company}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3"/></svg><input type="text" id="pf_company" value="${escAttr(p.company)}"></div>
 
     <label>${t('profileSiretLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><input type="text" id="pf_siret" value="${p.siret}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><input type="text" id="pf_siret" value="${escAttr(p.siret)}"></div>
 
     <label>${t('profileAddressLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/></svg><input type="text" id="pf_address" value="${p.address}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/></svg><input type="text" id="pf_address" value="${escAttr(p.address)}"></div>
 
     <label>${t('profilePhoneLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><input type="tel" id="pf_phone" value="${p.phone}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><input type="tel" id="pf_phone" value="${escAttr(p.phone)}"></div>
 
     <label>${t('profileEmailLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><input type="email" id="pf_email" value="${p.email}"></div>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><input type="email" id="pf_email" value="${escAttr(p.email)}"></div>
 
     <div class="row2">
       <div>
         <label>${t('profileVehicleModelLabel')}</label>
-        <input type="text" id="pf_vehicleModel" value="${p.vehicleModel}">
+        <input type="text" id="pf_vehicleModel" value="${escAttr(p.vehicleModel)}">
       </div>
       <div>
         <label>${t('profilePlateLabel')}</label>
-        <input type="text" id="pf_vehiclePlate" value="${p.vehiclePlate}">
+        <input type="text" id="pf_vehiclePlate" value="${escAttr(p.vehiclePlate)}">
       </div>
     </div>
 
@@ -2643,8 +3003,7 @@ function renderDriver(){
 
   document.getElementById('logoutBtn').onclick = () => {
     if(!confirm(t('confirmLogout'))) return;
-    history.replaceState(null, '', window.location.pathname);
-    state.view = 'client'; state.selectedDate = null; state.bookingStep = 1; render();
+    doLogout();
   };
 
   app.querySelectorAll('.bottom-nav-item').forEach(btn => {
@@ -2707,20 +3066,45 @@ function render(){
   const existingBar = document.getElementById('bottomBar');
   if(existingBar) existingBar.remove();
 
+  if(state.view !== 'track') stopTrackRefresh();
+
+  // Les espaces connectés ont besoin des réservations : on attend leur chargement
+  const needsData = state.session && ['driver','driver-course','account','track'].includes(state.view);
+  if(needsData && !state.bookingsLoaded){
+    renderLoading();
+    writeSession();
+    return;
+  }
+
   if(state.view === 'client') renderClient();
   else if(state.view === 'track') renderTrack();
   else if(state.view === 'account') renderAccount();
   else if(state.view === 'driver-login') renderDriverLogin();
   else if(state.view === 'driver') renderDriver();
   else if(state.view === 'driver-course') renderDriverCourse();
+
+  writeSession();
 }
 
 function checkSecretAccess(){
-  if(window.location.hash.toLowerCase() === '#admin'){ state.view = 'driver-login'; }
+  if(window.location.hash.toLowerCase() === '#admin'){
+    state.view = (state.session && state.session.role === 'driver') ? 'driver' : 'driver-login';
+  }
 }
+
+// Une seule écoute du redimensionnement pour les deux cartes
+window.addEventListener('resize', () => {
+  if(trackMapInstance) trackMapInstance.getViewPort().resize();
+  if(driverCourseMapInstance) driverCourseMapInstance.getViewPort().resize();
+});
+
+restoreLang();
+restoreSession();
 checkSecretAccess();
-loadBookings();
-loadDriverProfile().then(() => { if(state.view === 'client' && !state.bookingOpen) render(); });
+render();          // affichage immédiat (page d'accueil, ou écran de chargement si connecté)
+loadBookings();    // puis chargement des réservations depuis la feuille
+loadDriverProfile().then(rerenderIfIdle);
+if(state.session && state.session.role === 'client') loadClientProfile().then(rerenderIfIdle);
 </script>
 </body>
 </html>

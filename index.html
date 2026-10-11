@@ -394,6 +394,15 @@
   .stat .num{font-family:'Space Grotesk';font-weight:700;font-size:20px;color:var(--ink);}
   .stat .lbl{font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.02em;margin-top:2px;}
 
+  .accept-btn{display:block;width:100%;margin-top:10px;background:var(--confirm);color:#fff;border:3px solid var(--ink);padding:12px;border-radius:var(--radius-pill);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;box-shadow:4px 4px 0 var(--ink);font-family:'Inter';}
+  .accept-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink);}
+  .accept-btn:disabled{opacity:.6;cursor:wait;}
+  .status-chip.toconfirm{background:var(--danger);color:#fff;}
+  .accept-result{background:var(--white);border:3px solid var(--ink);border-radius:var(--radius-lg);padding:16px;margin-top:16px;box-shadow:5px 5px 0 var(--confirm);}
+  .accept-result-title{font-family:'Space Grotesk';font-weight:700;font-size:15px;}
+  .accept-result-line{font-size:12.5px;color:var(--ink-dim);margin-top:6px;line-height:1.5;}
+  .doc-links{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;}
+  .doc-pending{margin-top:10px;font-size:12px;color:var(--ink-dim);font-style:italic;line-height:1.5;}
   .link-inline{background:none;border:none;padding:0;color:var(--ink-dim);text-decoration:underline;cursor:pointer;font-size:12.5px;font-family:'Inter';font-weight:600;}
   .link-inline:hover{color:var(--ink);}
   input[readonly]{background:var(--cream-2);color:var(--ink-dim);}
@@ -571,7 +580,7 @@
 <div id="app"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwX9kZ5lw5-KGP2N5U-mIQ3ntS_0uDPNncPYgIiAS26Tahtks-FQV1RtUQQY4Lbfjba/exec';
+const APPS_SCRIPT_URL = 'COLLEZ_ICI_VOTRE_URL_APPS_SCRIPT';
 // Clé API HERE (Platform.here.com > Projects > votre projet > REST API key)
 const HERE_API_KEY = 'lDqm6cc8GY7_EUpNPhmn9qDIKhbFD1_IYy91h1Q87nk';
 const DRIVER_WHATSAPP = '33695567192';
@@ -587,8 +596,7 @@ const DRIVER_EMAIL = 'COLLEZ_ICI_VOTRE_EMAIL';
 const VEHICLE_MODEL = 'COLLEZ_ICI_MODELE_VEHICULE';
 const VEHICLE_PLATE = 'COLLEZ_ICI_PLAQUE_IMMATRICULATION';
 const DRIVER_ADDRESS = 'COLLEZ_ICI_VOTRE_ADRESSE';
-const DRIVER_USERNAME = 'admin';
-const DRIVER_PASSWORD = 'vtc2026';
+// (Le mot de passe chauffeur n'est plus dans ce fichier : il est vérifié par le serveur, voir script Google)
 
 const MONTHS = {
   fr: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
@@ -614,6 +622,19 @@ const I18N = {
     trackSearchBtn: 'Rechercher',
     trackSearching: 'Recherche en cours…',
     trackNoResults: 'Aucune réservation trouvée avec ce numéro.',
+    sendCodeBtn: 'Recevoir mon code par e-mail',
+    codeSentIntro: "Saisissez le code à 6 chiffres envoyé à l'adresse e-mail de votre réservation (pensez à vérifier vos courriers indésirables). Il est valable 10 minutes.",
+    codeLabel: 'Code de connexion',
+    codeLoginBtn: 'Se connecter',
+    resendCode: 'Renvoyer le code',
+    changePhone: 'Changer de numéro',
+    codeSentNotice: "Si ce numéro correspond à une réservation avec une adresse e-mail, un code vient d'être envoyé.",
+    wrongCode: 'Code incorrect ou expiré.',
+    invalidPhone: 'Numéro de téléphone invalide.',
+    networkError: 'Connexion impossible. Vérifiez votre réseau et réessayez.',
+    loginLocked: 'Trop de tentatives. Réessayez dans 10 minutes.',
+    driverNotConfigured: "Mot de passe chauffeur non défini dans le script Google (ADMIN_PASSWORD).",
+    sessionExpired: 'Votre session a expiré. Veuillez vous reconnecter.',
     trackResultsTitle: 'Vos réservations',
     trackNotConfigured: "Le suivi n'est pas encore activé sur ce site.",
     accountBtn: '👤 Espace client · Suivre ma course',
@@ -663,8 +684,36 @@ const I18N = {
     clientInfoTitle: 'Informations client',
     infoName: 'Nom',
     clientSpaceLabel: "Espace client",
+    acceptBtn: "✔ Accepter la réservation",
+    accepting: "Confirmation…",
+    acceptError: "Impossible de confirmer pour le moment (connexion au serveur). Réessayez.",
+    acceptDone: "Réservation confirmée",
+    acceptOrderNo: "bon de commande n°",
+    acceptEmailSent: "📧 E-mail avec le bon de commande envoyé à",
+    acceptNoEmail: "Aucune adresse e-mail renseignée par le client : prévenez-le par WhatsApp.",
+    acceptWhatsappBtn: "💬 Prévenir le client sur WhatsApp",
+    acceptDismiss: "Fermer",
+    statusToConfirm: "À confirmer",
+    statusConfirmed: "Confirmée",
+    docOrder: "⬇ Bon de commande (PDF)",
+    docInvoice: "⬇ Facture (PDF)",
+    markCompleted: "Marquer terminée et éditer la facture",
+    confirmFinish: "Marquer cette course comme terminée et éditer la facture ?",
+    invoiceIssued: "Facture n°",
+    awaitingConfirmation: "En attente de confirmation du chauffeur : votre bon de commande vous sera envoyé par e-mail et WhatsApp, puis téléchargeable ici.",
+    trackWaitingConfirm: "En attente de confirmation de votre chauffeur…",
+    clientStageConfirmed: "Course confirmée",
+    stageLabelConfirmed: "Confirmée, prête à partir",
+    profileLegalFormLabel: "Forme juridique (EI, SASU, EURL…)",
+    profileVtcRegistryLabel: "N° d'inscription au registre VTC",
+    profileVtcCardLabel: "N° de carte professionnelle VTC",
+    profileVatNumberLabel: "N° de TVA intracommunautaire (si assujetti)",
+    profileVatRegimeLabel: "Régime de TVA",
+    vatRegimeVat: "Assujetti à la TVA : 10 % (transport de personnes)",
+    vatRegimeFranchise: "Franchise en base (TVA non applicable, art. 293 B du CGI)",
+    vatRegimeHint: "À vérifier avec votre comptable : ces informations figurent sur vos bons de commande et vos factures.",
     clientLoginTitle: "Espace client",
-    clientLoginIntro: "Entrez le numéro de téléphone utilisé pour vos réservations afin d'accéder à votre espace client.",
+    clientLoginIntro: "Entrez le numéro de téléphone utilisé pour vos réservations. Nous vous enverrons un code de connexion par e-mail.",
     clientLoginBtn: "Se connecter",
     clientFirstNameLabel: "Prénom",
     clientLastNameLabel: "Nom",
@@ -784,7 +833,7 @@ const I18N = {
     confirmedDetailMid: 'à',
     confirmedDetailFrom: 'de',
     confirmedDetailTo: 'à',
-    confirmedNote: 'Envoyez le récapitulatif au chauffeur pour confirmer définitivement.',
+    confirmedNote: "Envoyez le récapitulatif au chauffeur sur WhatsApp. Dès qu'il aura confirmé votre course, vous recevrez votre bon de commande par e-mail et WhatsApp, et pourrez le télécharger dans votre espace client.",
     whatsappBtn: 'Confirmer sur WhatsApp',
     downloadReceipt: '⬇ Télécharger le bon de commande',
     emailReceipt: '✉ Recevoir par e-mail',
@@ -848,6 +897,19 @@ const I18N = {
     trackSearchBtn: 'Search',
     trackSearching: 'Searching…',
     trackNoResults: 'No booking found with this number.',
+    sendCodeBtn: 'Email me a login code',
+    codeSentIntro: 'Enter the 6-digit code sent to the email address used for your booking (check your spam folder). It is valid for 10 minutes.',
+    codeLabel: 'Login code',
+    codeLoginBtn: 'Sign in',
+    resendCode: 'Resend code',
+    changePhone: 'Change number',
+    codeSentNotice: 'If this number matches a booking with an email address, a code has just been sent.',
+    wrongCode: 'Incorrect or expired code.',
+    invalidPhone: 'Invalid phone number.',
+    networkError: 'Unable to connect. Check your network and try again.',
+    loginLocked: 'Too many attempts. Try again in 10 minutes.',
+    driverNotConfigured: 'Driver password not set in the Google script (ADMIN_PASSWORD).',
+    sessionExpired: 'Your session has expired. Please sign in again.',
     trackResultsTitle: 'Your bookings',
     trackNotConfigured: "Tracking isn't enabled on this site yet.",
     accountBtn: '👤 Client area · Track my ride',
@@ -897,8 +959,36 @@ const I18N = {
     clientInfoTitle: 'Client information',
     infoName: 'Name',
     clientSpaceLabel: "Client area",
+    acceptBtn: "✔ Accept booking",
+    accepting: "Confirming…",
+    acceptError: "Could not confirm right now (server connection). Please try again.",
+    acceptDone: "Booking confirmed",
+    acceptOrderNo: "order form no.",
+    acceptEmailSent: "📧 E-mail with the order form sent to",
+    acceptNoEmail: "The client gave no e-mail address: let them know via WhatsApp.",
+    acceptWhatsappBtn: "💬 Notify the client on WhatsApp",
+    acceptDismiss: "Close",
+    statusToConfirm: "To confirm",
+    statusConfirmed: "Confirmed",
+    docOrder: "⬇ Order form (PDF)",
+    docInvoice: "⬇ Invoice (PDF)",
+    markCompleted: "Mark as completed and issue the invoice",
+    confirmFinish: "Mark this ride as completed and issue the invoice?",
+    invoiceIssued: "Invoice no.",
+    awaitingConfirmation: "Waiting for the driver to confirm: your order form will be sent by e-mail and WhatsApp, then available here.",
+    trackWaitingConfirm: "Waiting for your driver to confirm…",
+    clientStageConfirmed: "Ride confirmed",
+    stageLabelConfirmed: "Confirmed, ready to go",
+    profileLegalFormLabel: "Legal form (EI, SASU, EURL…)",
+    profileVtcRegistryLabel: "VTC register registration no.",
+    profileVtcCardLabel: "VTC professional card no.",
+    profileVatNumberLabel: "EU VAT number (if subject to VAT)",
+    profileVatRegimeLabel: "VAT regime",
+    vatRegimeVat: "Subject to VAT: 10% (passenger transport)",
+    vatRegimeFranchise: "VAT exemption (not applicable, art. 293 B CGI)",
+    vatRegimeHint: "Check with your accountant: these details appear on your order forms and invoices (issued in French).",
     clientLoginTitle: "Client area",
-    clientLoginIntro: "Enter the phone number used for your bookings to access your client area.",
+    clientLoginIntro: "Enter the phone number used for your bookings. We will email you a login code.",
     clientLoginBtn: "Log in",
     clientFirstNameLabel: "First name",
     clientLastNameLabel: "Last name",
@@ -1018,7 +1108,7 @@ const I18N = {
     confirmedDetailMid: 'at',
     confirmedDetailFrom: 'from',
     confirmedDetailTo: 'to',
-    confirmedNote: 'Send the summary to the driver to finalise your booking.',
+    confirmedNote: "Send the summary to the driver on WhatsApp. Once they confirm your ride, you will receive your order form by e-mail and WhatsApp, and can download it from your client area.",
     whatsappBtn: 'Confirm on WhatsApp',
     downloadReceipt: '⬇ Download order confirmation',
     emailReceipt: '✉ Receive by email',
@@ -1083,6 +1173,7 @@ let state = {
   driverSection: 'reservations',
   session: null,
   bookingsLoaded: false,
+  acceptResult: null,
   clientSection: 'reservations',
   clientTab: 'upcoming',
   clientProfileData: null,
@@ -1128,7 +1219,7 @@ function writeSession(){
 }
 function restoreSession(){
   const s = readSession();
-  if(!s || (s.role !== 'driver' && s.role !== 'client')) return;
+  if(!s || (s.role !== 'driver' && s.role !== 'client') || !s.token) return; // anciennes sessions sans jeton : reconnexion
   state.session = s;
   const n = s.nav || {};
   ['driverSection','driverTab','driverCourseId','driverCourseTab','clientSection','clientTab','trackBookingId','trackTab'].forEach(k => {
@@ -1201,12 +1292,19 @@ function mapRow(r){
     name: cleanText(r.name || ''), phone: cleanText(String(r.phone || '')), email: cleanText(r.email || ''),
     depart: cleanText(r.depart || ''), arrivee: cleanText(r.arrivee || ''),
     km: r.km, min: r.min, price: r.price, createdAt: r.createdAt,
-    rating: r.rating || '', status: cleanText(r.status || 'pending')
+    rating: r.rating || '', status: cleanText(r.status || 'pending'),
+    orderNo: cleanText(r.orderNo || ''), orderDate: cleanText(r.orderDate || ''), orderIssuer: parseIssuer(r.orderIssuer),
+    invoiceNo: cleanText(r.invoiceNo || ''), invoiceDate: cleanText(r.invoiceDate || ''), invoiceIssuer: parseIssuer(r.invoiceIssuer)
   };
+}
+function parseIssuer(raw){
+  if(!raw) return null;
+  try{ const o = typeof raw === 'string' ? JSON.parse(raw) : raw; return (o && typeof o === 'object') ? cleanObj(o) : null; }catch(e){ return null; }
 }
 async function refreshBookings(){
   if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ state.bookingsLoaded = true; return; }
-  const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
+  // Connecté : mes réservations (client) ou toutes (chauffeur). Sinon : créneaux publics, sans données personnelles.
+  const rows = authToken() ? await apiGet({ type: 'bookings' }) : await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=slots`);
   if(Array.isArray(rows)) state.bookings = rows.map(mapRow);
   state.bookingsLoaded = true;
 }
@@ -1222,7 +1320,7 @@ function clientBookings(){
 async function loadClientProfile(){
   if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || !state.session || state.session.role !== 'client') return;
   try{
-    const saved = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=clientProfile&phone=${encodeURIComponent(state.session.phone)}`);
+    const saved = await apiGet({ type: 'clientProfile', phone: state.session.phone });
     if(saved && typeof saved === 'object' && !Array.isArray(saved)) state.clientProfileData = cleanObj(saved);
   }catch(e){}
 }
@@ -1253,6 +1351,25 @@ function driverPhoneForCall(){
 }
 
 
+// ===== Appels sécurisés au serveur =====
+function authToken(){ return (state.session && state.session.token) || ''; }
+// GET avec jeton : si le serveur répond « non autorisé », la session a expiré -> retour à la connexion
+async function apiGet(params){
+  const q = Object.keys(params).map(k => k + '=' + encodeURIComponent(params[k])).join('&');
+  const tok = authToken();
+  const res = await fetchViaJsonp(`${APPS_SCRIPT_URL}?${q}${tok ? '&token=' + encodeURIComponent(tok) : ''}`);
+  if(res && res.error === 'unauthorized' && state.session){ sessionExpired(); return null; }
+  return res;
+}
+function sessionExpired(){
+  stopTrackRefresh();
+  const wasDriver = state.session && state.session.role === 'driver';
+  state.session = null; state.bookings = []; state.clientProfileData = null;
+  state.view = wasDriver ? 'driver-login' : 'account';
+  state.loginNotice = 'sessionExpired';
+  render();
+}
+
 function fetchViaJsonp(url){
   return new Promise((resolve) => {
     const cbName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random()*10000);
@@ -1279,7 +1396,7 @@ function postToSheet(payload){
   return fetch(APPS_SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(Object.assign({}, payload, { token: authToken() }))
   }).catch(()=>{});
 }
 
@@ -1463,7 +1580,7 @@ async function calculateRoute(departAddress, arriveeAddress){
 }
 
 function fetchDriverPosition(){
-  return fetchViaJsonp(`${APPS_SCRIPT_URL}?type=position`);
+  return apiGet({ type: 'position' });
 }
 
 // Trajet complet (avec tracé encodé "flexible polyline") entre deux coordonnées [lon,lat]
@@ -1483,77 +1600,294 @@ async function routeBetweenCoords(fromCoord, toCoord){
   };
 }
 
-function buildReceiptDoc(booking){
-  const T = I18N[state.lang];
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-  const left = 48, right = 547;
+// ===== Documents : bon de commande (réservation préalable VTC) et facture — normes françaises =====
+const FR_TZ = 'Europe/Paris';
 
-  doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(30,25,20);
-  doc.text(T.receiptCompany, left, 60);
-  doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(120,111,96);
-  doc.text(`${T.receiptTitle} — ${T.receiptRef} ${booking.id}`, left, 78);
-  doc.setDrawColor(230,222,201); doc.setLineWidth(1);
-  doc.line(left, 92, right, 92);
+function fmtMoney(n){ return (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + ' €'; }
+function fmtDateFR(d){
+  if(!d) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(d)){ const p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+  const dt = new Date(d);
+  return isNaN(dt) ? String(d) : dt.toLocaleDateString('fr-FR', { timeZone: FR_TZ });
+}
+function fmtDateTimeFR(iso){
+  const dt = new Date(iso);
+  if(!iso || isNaN(dt)) return '';
+  return dt.toLocaleDateString('fr-FR', { timeZone: FR_TZ }) + ' à ' +
+         dt.toLocaleTimeString('fr-FR', { timeZone: FR_TZ, hour: '2-digit', minute: '2-digit' });
+}
+function siteUrl(){
+  return (location.origin && location.origin !== 'null') ? location.origin + location.pathname : location.href;
+}
+function toIntlPhone(p){
+  let d = String(p || '').replace(/\D/g, '');
+  if(d.indexOf('00') === 0) d = d.slice(2);
+  else if(d.charAt(0) === '0') d = '33' + d.slice(1);
+  return d;
+}
 
-  const rows = [
-    [T.receiptName, booking.name || '—'],
-    [T.receiptDate, booking.date],
-    [T.receiptTime, booking.time],
-    [T.receiptDepart, booking.depart],
-    [T.receiptArrivee, booking.arrivee],
-    [T.receiptPhone, booking.phone],
-    booking.email ? [T.emailLabelShort, booking.email] : null
-  ].filter(Boolean);
+// Émetteur du document : copie figée des infos du chauffeur au moment de l'émission (sinon profil actuel)
+function issuerOf(b, kind){
+  const snap = kind === 'invoice' ? b.invoiceIssuer : b.orderIssuer;
+  return (snap && Object.keys(snap).length) ? profileFrom(snap) : driverProfile();
+}
 
-  let y = 122;
-  rows.forEach(([label, val]) => {
-    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(120,111,96);
-    doc.text(label, left, y);
-    doc.setFont('helvetica','bold'); doc.setFontSize(11.5); doc.setTextColor(34,31,26);
-    doc.text(String(val), left, y + 15);
-    doc.setDrawColor(240,235,220);
-    doc.line(left, y + 24, right, y + 24);
-    y += 42;
+// Prix : le prix du site est un prix TTC. Décomposition HT / TVA 10 % (transport de personnes) ou franchise en base.
+function priceBreakdown(b, issuer){
+  const ttc = parseFloat(b.price);
+  if(isNaN(ttc)) return null;
+  if(issuer.vatRegime === 'franchise') return { ttc, ht: ttc, tva: 0, rate: 0, franchise: true };
+  const ht = Math.round(ttc / 1.10 * 100) / 100;
+  return { ttc, ht, tva: Math.round((ttc - ht) * 100) / 100, rate: 10, franchise: false };
+}
+
+function pdfNew(){ const { jsPDF } = window.jspdf; return new jsPDF({ unit: 'pt', format: 'a4' }); }
+
+function pdfHeader(doc, issuer, title, number, dateLabel, dateValue){
+  const L = 40, R = 555, y0 = 50;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(20);
+  doc.text(doc.splitTextToSize(issuer.company || issuer.name || 'Chauffeur VTC', 300), L, y0);
+
+  const raw = [];
+  if(issuer.company && issuer.name) raw.push('Chauffeur : ' + issuer.name);
+  if(issuer.legalForm) raw.push('Forme juridique : ' + issuer.legalForm);
+  if(issuer.address) raw.push(issuer.address);
+  if(issuer.siret) raw.push('SIRET : ' + issuer.siret);
+  if(issuer.vatNumber) raw.push('N° TVA intracommunautaire : ' + issuer.vatNumber);
+  if(issuer.vtcRegistry) raw.push('Inscription au registre VTC : ' + issuer.vtcRegistry);
+  if(issuer.vtcCard) raw.push('Carte professionnelle VTC : ' + issuer.vtcCard);
+  if(issuer.phone) raw.push('Tél. : ' + issuer.phone);
+  if(issuer.email) raw.push('E-mail : ' + issuer.email);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(70);
+  const lines = [];
+  raw.forEach(ln => doc.splitTextToSize(ln, 300).forEach(x => lines.push(x)));
+  lines.forEach((ln, i) => doc.text(ln, L, y0 + 16 + i * 12));
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(20);
+  doc.text(title, R, y0, { align: 'right' });
+  doc.setFontSize(10);
+  doc.text('N° ' + number, R, y0 + 20, { align: 'right' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(70);
+  doc.text(dateLabel + ' ' + dateValue, R, y0 + 34, { align: 'right' });
+
+  const bottom = y0 + 16 + Math.max(lines.length, 3) * 12;
+  doc.setDrawColor(200); doc.setLineWidth(0.8); doc.line(L, bottom + 8, R, bottom + 8);
+  return bottom + 30;
+}
+
+function pdfSection(doc, y, title, rows){
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(20);
+  doc.text(title.toUpperCase(), 40, y);
+  doc.setDrawColor(225); doc.setLineWidth(0.6); doc.line(40, y + 4, 555, y + 4);
+  y += 20;
+  rows.filter(r => r[1]).forEach(([k, v]) => {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(110);
+    doc.text(k, 40, y);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(20);
+    const lines = doc.splitTextToSize(String(v), 360);
+    doc.text(lines, 195, y);
+    y += Math.max(1, lines.length) * 13 + 3;
   });
+  return y + 8;
+}
 
-  if(booking.price){
-    y += 6;
-    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(124,43,47);
-    doc.text(`${T.receiptPrice} : ≈ ${booking.price} €`, left, y);
-    y += 30;
-  }
+function pdfNote(doc, y, text){
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(110);
+  const lines = doc.splitTextToSize(text, 515);
+  doc.text(lines, 40, y + 4);
+  return y + 4 + lines.length * 10;
+}
 
-  const issued = new Date().toLocaleString(state.lang === 'fr' ? 'fr-FR' : 'en-GB');
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(120,111,96);
-  doc.text(`${T.receiptIssued} ${issued}`, left, y + 16);
-  const footerLines = doc.splitTextToSize(T.receiptFooter, right - left);
-  doc.text(footerLines, left, y + 32);
+function vehicleLine(issuer){
+  return [issuer.vehicleModel, issuer.vehiclePlate ? 'immatriculation ' + issuer.vehiclePlate : ''].filter(Boolean).join(' — ');
+}
 
+// BON DE COMMANDE = justificatif de réservation préalable (VTC)
+function buildOrderDoc(b){
+  const issuer = issuerOf(b, 'order');
+  const doc = pdfNew();
+  let y = pdfHeader(doc, issuer, 'BON DE COMMANDE', b.orderNo || '—', 'Émis le', fmtDateTimeFR(b.orderDate));
+
+  y = pdfSection(doc, y, 'Client', [
+    ['Nom', b.name || '—'],
+    ['Téléphone', b.phone],
+    ['E-mail', b.email]
+  ]);
+  y = pdfSection(doc, y, 'Réservation préalable', [
+    ['Référence de réservation', b.id],
+    ['Réservation effectuée le', fmtDateTimeFR(b.createdAt)],
+    ['Date et heure de prise en charge', fmtDateFR(b.date) + ' à ' + b.time],
+    ['Lieu de prise en charge', b.depart],
+    ['Destination', b.arrivee],
+    ['Distance estimée', b.km ? String(b.km).replace('.', ',') + ' km' : '']
+  ]);
+  y = pdfSection(doc, y, 'Chauffeur et véhicule', [
+    ['Chauffeur', issuer.name],
+    ['Véhicule', vehicleLine(issuer)]
+  ]);
+
+  const pb = priceBreakdown(b, issuer);
+  const rows = [];
+  if(!pb) rows.push(['Prix', 'À confirmer par le chauffeur']);
+  else if(pb.franchise){ rows.push(['Prix de la course', fmtMoney(pb.ttc)], ['TVA', 'Non applicable, article 293 B du CGI']); }
+  else { rows.push(['Prix HT', fmtMoney(pb.ht)], ['TVA (10 %)', fmtMoney(pb.tva)], ['Prix TTC', fmtMoney(pb.ttc)]); }
+  rows.push(['Règlement', "À bord, à l'issue de la course (carte bancaire ou espèces)"]);
+  y = pdfSection(doc, y, 'Prix', rows);
+
+  pdfNote(doc, y,
+    "Course réalisée sur réservation préalable (transport public particulier de personnes - VTC). " +
+    "Le présent bon de commande atteste de cette réservation préalable ; il doit pouvoir être présenté à tout agent habilité lors d'un contrôle. " +
+    "Le prix indiqué est celui établi lors de la réservation et confirmé par le chauffeur à l'acceptation de la course. " +
+    "Une facture sera établie à l'issue de la course.");
   return doc;
 }
 
-function downloadReceipt(booking){
-  const doc = buildReceiptDoc(booking);
-  doc.save(`bon-de-commande-${booking.id}.pdf`);
+// FACTURE (établie quand le chauffeur a terminé la course)
+function buildInvoiceDoc(b){
+  const issuer = issuerOf(b, 'invoice');
+  const doc = pdfNew();
+  let y = pdfHeader(doc, issuer, 'FACTURE', b.invoiceNo || '—', "Date d'émission :", fmtDateFR(b.invoiceDate));
+
+  y = pdfSection(doc, y, 'Client', [
+    ['Nom', b.name || '—'],
+    ['Téléphone', b.phone],
+    ['E-mail', b.email]
+  ]);
+  y = pdfSection(doc, y, 'Prestation', [
+    ['Date de la prestation', fmtDateFR(b.date) + ' à ' + b.time],
+    ["Catégorie d'opération", 'Prestation de services (transport de personnes)'],
+    ['Références', 'Bon de commande n° ' + (b.orderNo || '—') + ' — réservation ' + b.id],
+    ['Véhicule', vehicleLine(issuer)]
+  ]);
+
+  const pb = priceBreakdown(b, issuer);
+  // Tableau
+  doc.setFillColor(240); doc.rect(40, y - 11, 515, 18, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(20);
+  doc.text('Désignation', 46, y);
+  doc.text('Qté', 330, y, { align: 'center' });
+  doc.text('PU HT', 400, y, { align: 'right' });
+  doc.text('TVA', 455, y, { align: 'right' });
+  doc.text('Total TTC', 549, y, { align: 'right' });
+  y += 20;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(20);
+  const desig = doc.splitTextToSize('Transport de personnes (VTC) : ' + b.depart + ' vers ' + b.arrivee, 250);
+  doc.text(desig, 46, y);
+  doc.text('1', 330, y, { align: 'center' });
+  if(pb){
+    doc.text(fmtMoney(pb.ht), 400, y, { align: 'right' });
+    doc.text(pb.franchise ? '—' : pb.rate + ' %', 455, y, { align: 'right' });
+    doc.text(fmtMoney(pb.ttc), 549, y, { align: 'right' });
+  } else {
+    doc.text('Montant non renseigné', 549, y, { align: 'right' });
+  }
+  y += Math.max(1, desig.length) * 12 + 6;
+  doc.setDrawColor(210); doc.setLineWidth(0.6); doc.line(40, y, 555, y);
+  y += 20;
+
+  if(pb){
+    const line = (label, value, bold) => {
+      doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(bold ? 11 : 9.5); doc.setTextColor(20);
+      doc.text(label, 400, y, { align: 'right' });
+      doc.text(value, 549, y, { align: 'right' });
+      y += bold ? 18 : 15;
+    };
+    line('Total HT', fmtMoney(pb.ht));
+    line(pb.franchise ? 'TVA' : 'TVA (' + pb.rate + ' %)', pb.franchise ? 'non applicable' : fmtMoney(pb.tva));
+    line('Total TTC — net à payer', fmtMoney(pb.ttc), true);
+    y += 6;
+    if(pb.franchise){
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(20);
+      doc.text('TVA non applicable, article 293 B du CGI.', 40, y); y += 14;
+    }
+  }
+  y = pdfSection(doc, y + 6, 'Règlement', [
+    ['Conditions', "Paiement comptant, à bord à l'issue de la course (carte bancaire ou espèces)"]
+  ]);
+  pdfNote(doc, y,
+    "Clients professionnels : en cas de retard de paiement, pénalités égales à trois fois le taux d'intérêt légal et indemnité forfaitaire " +
+    "pour frais de recouvrement de 40 € (articles L. 441-10 et D. 441-5 du code de commerce). Pas d'escompte pour paiement anticipé.");
+  return doc;
 }
 
-function getReceiptBase64(booking){
-  const doc = buildReceiptDoc(booking);
-  const dataUri = doc.output('datauristring');
-  return dataUri.split(',')[1];
-}
+function downloadOrder(b){ buildOrderDoc(b).save('bon-de-commande-' + (b.orderNo || b.id) + '.pdf'); }
+function downloadInvoice(b){ buildInvoiceDoc(b).save('facture-' + (b.invoiceNo || b.id) + '.pdf'); }
+function docBase64(doc){ return doc.output('datauristring').split(',')[1]; }
 
-async function sendReceiptByEmail(booking, toEmail){
-  const T = I18N[state.lang];
-  const pdfBase64 = getReceiptBase64(booking);
+async function sendOrderEmail(b){
+  const issuer = issuerOf(b, 'order');
+  const who = issuer.company || issuer.name || 'Votre chauffeur';
+  const body = [
+    'Bonjour' + (b.name ? ' ' + b.name : '') + ',', '',
+    'Votre course du ' + fmtDateFR(b.date) + ' à ' + b.time + ' est confirmée.', '',
+    'Départ : ' + b.depart,
+    'Arrivée : ' + b.arrivee,
+    b.price ? 'Prix : ' + fmtMoney(parseFloat(b.price)) + ' TTC' : '', '',
+    'Vous trouverez votre bon de commande n° ' + b.orderNo + ' en pièce jointe.',
+    'Vous pouvez aussi le télécharger à tout moment depuis votre espace client : ' + siteUrl() + ' (connexion avec votre numéro de téléphone : un code de connexion vous sera envoyé par e-mail).', '',
+    'Cordialement,', who
+  ].join('\n');
   await postToSheet({
     action: 'sendReceipt',
-    to: toEmail,
-    subject: T.emailSubject,
-    body: T.receiptFooter,
-    filename: `bon-de-commande-${booking.id}.pdf`,
-    pdfBase64
+    to: b.email,
+    subject: 'Course confirmée — bon de commande n° ' + b.orderNo,
+    body,
+    filename: 'bon-de-commande-' + b.orderNo + '.pdf',
+    pdfBase64: docBase64(buildOrderDoc(b))
+  });
+}
+
+function clientWhatsappUrl(b){
+  const who = (issuerOf(b, 'order').company || issuerOf(b, 'order').name || '');
+  const msg = [
+    'Bonjour' + (b.name ? ' ' + b.name : '') + ',', '',
+    'Votre course du ' + fmtDateFR(b.date) + ' à ' + b.time + ' (' + b.depart + ' → ' + b.arrivee + ') est confirmée ✅',
+    'Bon de commande n° ' + b.orderNo + '.',
+    b.email ? 'Il vous a été envoyé par e-mail.' : '',
+    'Vous pouvez aussi le télécharger depuis votre espace client : ' + siteUrl() + ' (connexion avec ce numéro de téléphone : un code vous sera envoyé par e-mail).', '',
+    who
+  ].join('\n');
+  return 'https://wa.me/' + toIntlPhone(b.phone) + '?text=' + encodeURIComponent(msg);
+}
+
+// Le chauffeur accepte : numéro de bon de commande attribué par le serveur, e-mail avec PDF, message WhatsApp prêt
+async function acceptBooking(id){
+  const b = state.bookings.find(x => x.id === id);
+  if(!b) return false;
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ alert(t('profileNotConfigured')); return false; }
+  const row = await apiGet({ type: 'confirm', id });
+  if(!row || row.error || !row.orderNo){ alert(t('acceptError')); return false; }
+  Object.assign(b, mapRow(row));
+  let emailSent = false;
+  if(b.email){ try{ await sendOrderEmail(b); emailSent = true; }catch(e){} }
+  state.acceptResult = { id, orderNo: b.orderNo, email: emailSent ? b.email : '', waUrl: clientWhatsappUrl(b) };
+  return true;
+}
+
+async function completeBooking(b){
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')) return false;
+  const row = await apiGet({ type: 'complete', id: b.id });
+  if(!row || row.error){ return false; }
+  Object.assign(b, mapRow(row));
+  return true;
+}
+
+// Boutons de documents côté client (bon de commande dès la confirmation, facture à la fin de course)
+function docLinksHTML(b){
+  const out = [];
+  if(b.orderNo) out.push(`<button class="link-inline" data-order-id="${b.id}">${t('docOrder')}</button>`);
+  if(b.invoiceNo) out.push(`<button class="link-inline" data-invoice-id="${b.id}">${t('docInvoice')}</button>`);
+  return out.length ? `<div class="doc-links">${out.join('')}</div>` : '';
+}
+function clientDocsHTML(b){
+  return docLinksHTML(b) || `<div class="doc-pending">${t('awaitingConfirmation')}</div>`;
+}
+function bindDocButtons(root){
+  root.querySelectorAll('[data-order-id]').forEach(btn => {
+    btn.onclick = () => { const b = state.bookings.find(x => x.id === btn.dataset.orderId); if(b) downloadOrder(b); };
+  });
+  root.querySelectorAll('[data-invoice-id]').forEach(btn => {
+    btn.onclick = () => { const b = state.bookings.find(x => x.id === btn.dataset.invoiceId); if(b) downloadInvoice(b); };
   });
 }
 
@@ -1807,14 +2141,6 @@ function renderBookingOverlay(){
           ${t('confirmedNote')}
         </div>
         <a class="whatsapp-btn" id="waLink" href="${lb?.waHref || '#'}" target="_blank">${t('whatsappBtn')}</a>
-        <button class="ghost-btn" id="downloadReceiptBtn" style="width:100%;margin-top:12px;justify-content:center;display:flex;">${t('downloadReceipt')}</button>
-        ${!lb?.email ? `
-        <div class="field" style="margin-top:10px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-          <input type="email" id="receiptEmailInput" placeholder="${t('emailPlaceholder')}">
-        </div>` : ''}
-        <button class="ghost-btn" id="emailReceiptBtn" style="width:100%;margin-top:10px;justify-content:center;display:flex;">${t('emailReceipt')}</button>
-        <div id="emailStatus" style="font-size:12px;color:var(--ink-dim);margin-top:8px;min-height:14px;"></div>
         <button class="primary-btn" id="backHomeBtn">${t('backHome')}</button>
         <button class="link-btn" id="newBooking">${t('newBooking')}</button>
       </div>`;
@@ -2030,21 +2356,6 @@ function renderBookingOverlay(){
   }
 
   if(step === 3){
-    document.getElementById('downloadReceiptBtn').onclick = () => { if(lb) downloadReceipt(lb); };
-    document.getElementById('emailReceiptBtn').onclick = async () => {
-      if(!lb) return;
-      let email = lb.email;
-      if(!email){
-        const input = document.getElementById('receiptEmailInput');
-        email = input ? input.value.trim() : '';
-        if(!email){ alert(t('emailRequiredAlert')); return; }
-      }
-      if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ alert(t('receiptNotConfigured')); return; }
-      const statusEl = document.getElementById('emailStatus');
-      statusEl.textContent = t('sendingReceipt');
-      await sendReceiptByEmail(lb, email);
-      statusEl.textContent = t('receiptSentNote');
-    };
     document.getElementById('backHomeBtn').onclick = () => {
       state.bookingOpen = false; state.bookingStep = 1; state.selectedDate = null; state.lastBooking = null; render();
     };
@@ -2071,15 +2382,20 @@ function isBookingPast(b){
 }
 
 // Fusionne le profil enregistré (Google Sheet) avec les constantes par défaut du fichier
-function driverProfile(){
-  const p = state.driverProfileData || {};
+function profileFrom(p){
+  p = p || {};
   const v = (x) => (x && !String(x).includes('COLLEZ_ICI')) ? x : '';
   return {
     photo: v(p.photo || DRIVER_PHOTO_URL),
     vehiclePhoto: v(p.vehiclePhoto || VEHICLE_PHOTO_URL),
     name: v(p.name || DRIVER_DISPLAY_NAME),
     company: v(p.company || COMPANY_NAME),
+    legalForm: v(p.legalForm),
     siret: v(p.siret || COMPANY_SIRET),
+    vatNumber: v(p.vatNumber),
+    vtcRegistry: v(p.vtcRegistry),
+    vtcCard: v(p.vtcCard),
+    vatRegime: p.vatRegime === 'franchise' ? 'franchise' : 'vat',
     address: v(p.address || DRIVER_ADDRESS),
     phone: v(p.phone || DRIVER_PHONE_DISPLAY),
     email: v(p.email || DRIVER_EMAIL),
@@ -2087,11 +2403,13 @@ function driverProfile(){
     vehiclePlate: v(p.vehiclePlate || VEHICLE_PLATE)
   };
 }
+// Fusionne le profil enregistré avec les valeurs par défaut du fichier
+function driverProfile(){ return profileFrom(state.driverProfileData); }
 
 async function loadDriverProfile(){
   if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')) return;
   try{
-    const saved = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=profile`);
+    const saved = await apiGet({ type: 'profile' });
     if(saved && typeof saved === 'object' && !Array.isArray(saved)) state.driverProfileData = cleanObj(saved);
   }catch(e){ /* pas de profil enregistré pour le moment */ }
 }
@@ -2117,8 +2435,8 @@ async function refreshLiveTracking(booking){
 
   // La carte ne s'affiche que si le chauffeur a démarré sa prise en charge (statut ≠ "pending")
   const status = booking.status || 'pending';
-  if(status === 'pending'){
-    if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t('trackWaitingLive'); }
+  if(status === 'pending' || status === 'confirmed'){
+    if(waitEl){ waitEl.style.display = ''; waitEl.textContent = t(status === 'pending' ? 'trackWaitingConfirm' : 'trackWaitingLive'); }
     if(mapEl) mapEl.style.display = 'none';
     return;
   }
@@ -2182,6 +2500,7 @@ function renderStars(container, currentValue){
 function clientStageText(status){
   return ({
     pending: t('clientStagePending'),
+    confirmed: t('clientStageConfirmed'),
     to_pickup: t('clientStageToPickup'),
     in_progress: t('clientStageInProgress'),
     completed: t('clientStageCompleted')
@@ -2191,14 +2510,13 @@ function clientStageText(status){
 async function pollTrack(booking){
   if(state.view !== 'track') return;
   try{
-    const rows = await fetchViaJsonp(APPS_SCRIPT_URL);
+    const rows = await apiGet({ type: 'bookings' });
     if(Array.isArray(rows)){
       const r = rows.find(x => String(x.id) === String(booking.id));
       if(r){
-        const ns = cleanText(r.status || 'pending');
         const old = booking.status || 'pending';
-        booking.status = ns;
-        if(r.rating) booking.rating = r.rating;
+        Object.assign(booking, mapRow(r));
+        const ns = booking.status;
         if(ns === 'completed'){ stopTrackRefresh(); state.trackTab = 'details'; render(); return; }
         if(ns !== old){
           const pill = document.getElementById('trackStagePill');
@@ -2258,7 +2576,7 @@ function rideDetailsHTML(booking, completed){
       <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
       <a href="tel:${driverPhoneForCall()}" class="ghost-btn" style="justify-content:center;display:flex;">📞 ${t('callClient')}</a>
     </div>
-    <button class="ghost-btn" id="invoiceBtn" style="width:100%;margin-top:10px;justify-content:center;display:flex;">${t('accountDownloadInvoice')}</button>
+    ${clientDocsHTML(booking)}
     ${ratingBlock}`;
 }
 
@@ -2279,7 +2597,7 @@ function renderTrack(){
     app.innerHTML = `
       <div class="fullscreen-map-wrap">
         <div id="trackMap" class="track-map" style="display:none;"></div>
-        <div id="trackWaitingMsg" class="track-waiting-full">${t('trackWaitingLive')}</div>
+        <div id="trackWaitingMsg" class="track-waiting-full">${(booking.status || 'pending') === 'pending' ? t('trackWaitingConfirm') : t('trackWaitingLive')}</div>
 
         <div class="fullscreen-map-overlay-top">
           <button class="map-back-btn" id="back" aria-label="${t('back')}">${iconBack()}</button>
@@ -2340,7 +2658,7 @@ function renderTrack(){
       btn.onclick = () => { state.trackTab = btn.dataset.trackTab; render(); };
     });
   }
-  document.getElementById('invoiceBtn').onclick = () => downloadReceipt(booking);
+  bindDocButtons(app);
 
   const starEl = document.getElementById('starRating');
   if(starEl){
@@ -2371,6 +2689,26 @@ function renderAccount(){
 
 function renderClientLogin(){
   const app = document.getElementById('app');
+  const step = state.loginStep === 'code' && state.loginPhone ? 'code' : 'phone';
+  const phoneHTML = `
+        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('clientLoginIntro')}</div>
+        <label>${t('accountPhoneLabel')}</label>
+        <div class="field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+          <input type="tel" id="loginPhone" placeholder="06 12 34 56 78" autocomplete="tel" value="${escAttr(state.loginPhone || '')}">
+        </div>
+        <button class="primary-btn" id="clientLoginBtn">${t('sendCodeBtn')}</button>`;
+  const codeHTML = `
+        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('codeSentIntro')}</div>
+        <label>${t('codeLabel')}</label>
+        <div class="field">
+          <input type="text" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="······" style="letter-spacing:6px;font-size:20px;text-align:center;">
+        </div>
+        <button class="primary-btn" id="clientCodeBtn">${t('codeLoginBtn')}</button>
+        <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;">
+          <button class="link-inline" id="resendCodeBtn">${t('resendCode')}</button>
+          <button class="link-inline" id="changePhoneBtn">${t('changePhone')}</button>
+        </div>`;
   app.innerHTML = `
     <div class="container" style="padding-top:28px;">
       <div class="toprow" style="padding-top:0;">
@@ -2381,36 +2719,56 @@ function renderClientLogin(){
         </div>
       </div>
       <div class="card" style="margin-top:18px;">
-        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('clientLoginIntro')}</div>
-        <label>${t('accountPhoneLabel')}</label>
-        <div class="field">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
-          <input type="tel" id="loginPhone" placeholder="06 12 34 56 78" autocomplete="tel">
-        </div>
-        <button class="primary-btn" id="clientLoginBtn">${t('clientLoginBtn')}</button>
+        ${step === 'code' ? codeHTML : phoneHTML}
         <div id="loginStatus" style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;"></div>
       </div>
     </div>`;
   bindLangSwitch();
-  document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.view = 'client'; render(); };
-
-  const input = document.getElementById('loginPhone');
+  document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.loginStep = 'phone'; state.loginNotice = null; state.view = 'client'; render(); };
   const statusEl = document.getElementById('loginStatus');
-  const doLogin = async () => {
-    const phone = input.value.trim();
-    if(!phone) return;
-    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('trackNotConfigured'); return; }
-    statusEl.textContent = t('trackSearching');
-    try{ await refreshBookings(); }catch(e){}
-    const key = normPhone(phone);
-    if(!state.bookings.some(b => normPhone(b.phone) === key)){ statusEl.textContent = t('trackNoResults'); return; }
-    state.session = { role: 'client', phone };
-    state.clientSection = 'reservations'; state.clientTab = 'upcoming'; state.clientProfileData = null;
-    await loadClientProfile();
-    render();
+  if(state.loginNotice){ statusEl.textContent = t(state.loginNotice); }
+
+  const requestCode = async (phone) => {
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('trackNotConfigured'); return false; }
+    state.loginNotice = null; statusEl.textContent = t('trackSearching');
+    const res = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=clientCode&phone=${encodeURIComponent(phone)}`);
+    if(!res || res.error){ statusEl.textContent = res && res.error === 'invalid_phone' ? t('invalidPhone') : t('networkError'); return false; }
+    return true;
   };
-  document.getElementById('clientLoginBtn').onclick = doLogin;
-  input.addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
+
+  if(step === 'phone'){
+    const input = document.getElementById('loginPhone');
+    const go = async () => {
+      const phone = input.value.trim();
+      if(!phone) return;
+      if(await requestCode(phone)){ state.loginPhone = phone; state.loginStep = 'code'; state.loginNotice = 'codeSentNotice'; renderClientLogin(); }
+    };
+    document.getElementById('clientLoginBtn').onclick = go;
+    input.addEventListener('keydown', (e) => { if(e.key === 'Enter') go(); });
+  } else {
+    const codeInput = document.getElementById('loginCode');
+    codeInput.focus();
+    const verify = async () => {
+      const code = codeInput.value.replace(/\D/g, '');
+      if(code.length !== 6) return;
+      state.loginNotice = null; statusEl.textContent = t('trackSearching');
+      const res = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=clientVerify&phone=${encodeURIComponent(state.loginPhone)}&code=${encodeURIComponent(code)}`);
+      if(!res || !res.token){ statusEl.textContent = !res ? t('networkError') : t('wrongCode'); return; }
+      state.session = { role: 'client', phone: state.loginPhone, token: res.token };
+      state.loginStep = 'phone';
+      state.clientSection = 'reservations'; state.clientTab = 'upcoming'; state.clientProfileData = null;
+      state.bookings = []; state.bookingsLoaded = false; state.view = 'account';
+      render();
+      await Promise.all([refreshBookings().catch(()=>{}), loadClientProfile()]);
+      state.bookingsLoaded = true;
+      if(!clientBookings().length){ state.session = null; state.loginStep = 'phone'; state.loginNotice = 'trackNoResults'; }
+      render();
+    };
+    document.getElementById('clientCodeBtn').onclick = verify;
+    codeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') verify(); });
+    document.getElementById('resendCodeBtn').onclick = async () => { if(await requestCode(state.loginPhone)) statusEl.textContent = t('codeSentNotice'); };
+    document.getElementById('changePhoneBtn').onclick = () => { state.loginStep = 'phone'; renderClientLogin(); };
+  }
 }
 
 function clientReservationsPanel(mine){
@@ -2424,7 +2782,7 @@ function clientReservationsPanel(mine){
       <div class="top">
         <span>${b.date} — ${b.time}</span>
         <span style="display:flex;align-items:center;gap:8px;">
-          <span class="status-chip ${tab === 'upcoming' ? 'upcoming' : 'done'}">${tab === 'upcoming' ? t('trackStatusUpcoming') : t('trackStatusDone')}</span>
+          <span class="status-chip ${tab === 'upcoming' ? ((b.status || 'pending') === 'pending' ? 'toconfirm' : 'upcoming') : 'done'}">${tab === 'upcoming' ? ((b.status || 'pending') === 'pending' ? t('statusToConfirm') : t('statusConfirmed')) : t('trackStatusDone')}</span>
           ${b.price ? b.price + ' €' : ''}
         </span>
       </div>
@@ -2434,7 +2792,7 @@ function clientReservationsPanel(mine){
         🎫 ${b.id}${b.rating ? `<br>⭐ ${b.rating}/5` : ''}
       </div>
       <button class="course-link" data-track-id="${b.id}">${tab === 'upcoming' ? t('courseLinkBtn') : t('rideViewRate')}</button>
-      <div style="margin-top:8px;"><button class="link-inline" data-invoice-id="${b.id}">${t('accountDownloadInvoice')}</button></div>
+      ${clientDocsHTML(b)}
     </div>`;
 
   return `
@@ -2547,12 +2905,7 @@ function renderClientSpace(){
         render();
       };
     });
-    app.querySelectorAll('[data-invoice-id]').forEach(btn => {
-      btn.onclick = () => {
-        const b = state.bookings.find(x => x.id === btn.dataset.invoiceId);
-        if(b) downloadReceipt(b);
-      };
-    });
+    bindDocButtons(app);
     document.getElementById('newBookingBtn').onclick = () => {
       state.view = 'client'; state.bookingOpen = true; state.bookingStep = 1; render();
     };
@@ -2598,12 +2951,32 @@ function renderDriverLogin(){
     </div>
   `;
   bindLangSwitch();
-  document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.view='client'; render(); };
-  document.getElementById('loginBtn').onclick = () => {
+  document.getElementById('back').onclick = () => { history.replaceState(null, '', window.location.pathname); state.loginNotice = null; state.view='client'; render(); };
+  const errEl = document.getElementById('pwError');
+  if(state.loginNotice){ errEl.textContent = t(state.loginNotice); errEl.style.display = 'block'; }
+  const loginBtn = document.getElementById('loginBtn');
+  const doDriverLogin = async () => {
     const username = document.getElementById('username').value.trim();
-    if(username === DRIVER_USERNAME && document.getElementById('pw').value === DRIVER_PASSWORD){ state.session = { role: 'driver' }; state.view = 'driver'; render(); }
-    else{ document.getElementById('pwError').style.display = 'block'; }
+    const password = document.getElementById('pw').value;
+    if(!username || !password) return;
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ errEl.textContent = t('trackNotConfigured'); errEl.style.display = 'block'; return; }
+    loginBtn.disabled = true; errEl.style.display = 'none'; state.loginNotice = null;
+    const res = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=driverLogin&u=${encodeURIComponent(username)}&p=${encodeURIComponent(password)}`);
+    loginBtn.disabled = false;
+    if(!res || !res.token){
+      errEl.textContent = !res ? t('networkError') : res.error === 'locked' ? t('loginLocked') : res.error === 'not_configured' ? t('driverNotConfigured') : t('wrongPw');
+      errEl.style.display = 'block';
+      return;
+    }
+    state.session = { role: 'driver', token: res.token };
+    state.bookings = []; state.bookingsLoaded = false; state.view = 'driver';
+    render();                                  // écran de chargement
+    await Promise.all([refreshBookings().catch(()=>{}), loadDriverProfile()]);
+    state.bookingsLoaded = true;
+    render();                                  // calendrier / réservations du chauffeur
   };
+  loginBtn.onclick = doDriverLogin;
+  document.getElementById('pw').addEventListener('keydown', (e) => { if(e.key === 'Enter') doDriverLogin(); });
 }
 
 let driverCourseMapInstance = null;
@@ -2665,9 +3038,10 @@ function renderDriverCourse(){
   if(driverCourseMapInstance){ driverCourseMapInstance.dispose(); driverCourseMapInstance = null; }
 
   const status = booking.status || 'pending';
+  if(status === 'pending'){ state.view = 'driver'; state.driverTab = 'upcoming'; render(); return; } // d'abord accepter la réservation
   const targetAddress = status === 'in_progress' ? booking.arrivee : booking.depart;
   const stageInfo = {
-    pending:     { label: t('stagePickup'),    tag: t('stageLabelPending') },
+    confirmed:   { label: t('stagePickup'),    tag: t('stageLabelConfirmed') },
     to_pickup:   { label: t('stageStartRide'), tag: t('stageLabelToPickup') },
     in_progress: { label: t('stageEndRide'),   tag: t('stageLabelInProgress') },
     completed:   { label: '',                  tag: t('stageLabelCompleted') }
@@ -2831,19 +3205,25 @@ function renderDriverCourse(){
 
   if(status === 'completed') return;
 
-  const nextStatusMap = { pending: 'to_pickup', to_pickup: 'in_progress', in_progress: 'completed' };
+  const nextStatusMap = { confirmed: 'to_pickup', to_pickup: 'in_progress', in_progress: 'completed' };
 
   setupThreeStageSlider(async (resetFn) => {
     const newStatus = nextStatusMap[status];
     booking.status = newStatus;
-    await postToSheet({ action: 'updateStatus', id: booking.id, status: newStatus });
+    if(newStatus === 'completed'){
+      // le serveur attribue le numéro de facture (séquentiel, sans doublon)
+      const ok = await completeBooking(booking);
+      if(!ok){ await postToSheet({ action: 'updateStatus', id: booking.id, status: 'completed' }); }
+    } else {
+      await postToSheet({ action: 'updateStatus', id: booking.id, status: newStatus });
+    }
     const statusEl = document.getElementById('courseSlideStatus');
 
     if(newStatus === 'completed'){
       if(state.geoWatchId !== null){ navigator.geolocation.clearWatch(state.geoWatchId); state.geoWatchId = null; }
       if(driverCourseMapInstance){ driverCourseMapInstance.dispose(); driverCourseMapInstance = null; }
-      if(statusEl) statusEl.textContent = t('courseCompletedNote');
-      setTimeout(() => { state.view = 'driver'; state.driverCourseId = null; render(); }, 1200);
+      if(statusEl) statusEl.textContent = t('courseCompletedNote') + (booking.invoiceNo ? ' ' + t('invoiceIssued') + ' ' + booking.invoiceNo + '.' : '');
+      setTimeout(() => { state.view = 'driver'; state.driverCourseId = null; state.driverTab = 'completed'; render(); }, 1800);
     } else {
       render();
     }
@@ -2872,31 +3252,51 @@ function renderDriverReservationsPanel(){
   const upcomingList = all.filter(b => !isBookingCompleted(b)).sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
   const tab = state.driverTab || 'upcoming';
 
-  const rowHTML = (b, kind) => `
+  const rowHTML = (b, kind) => {
+    const st = b.status || 'pending';
+    const needsAccept = kind === 'upcoming' && st === 'pending';
+    const chipClass = kind === 'completed' ? 'done' : (needsAccept ? 'toconfirm' : 'upcoming');
+    const chipText = kind === 'completed' ? t('trackStatusDone') : (needsAccept ? t('statusToConfirm') : t('statusConfirmed'));
+    const canFinish = kind === 'completed' && st !== 'completed' && st !== 'pending';
+    return `
     <div class="booking-row">
       <div class="top">
         <span>${b.date} — ${b.time}</span>
         <span style="display:flex;align-items:center;gap:8px;">
-          <span class="status-chip ${kind === 'upcoming' ? 'upcoming' : 'done'}">${kind === 'upcoming' ? t('trackStatusUpcoming') : t('trackStatusDone')}</span>
+          <span class="status-chip ${chipClass}">${chipText}</span>
           ${b.price ? b.price+' €' : ''}
         </span>
       </div>
       <div class="detail">
         ${b.name ? `👤 ${b.name}<br>` : ''}
-        🎫 ${b.id}<br>
+        🎫 ${b.id}${b.orderNo ? ` · ${b.orderNo}` : ''}${b.invoiceNo ? ` · ${b.invoiceNo}` : ''}<br>
         📞 <a href="tel:${b.phone}" style="color:inherit;">${b.phone}</a>${b.email ? ` · ✉ <a href="mailto:${b.email}" style="color:inherit;">${b.email}</a>` : ''}<br>
         ${t('from')} : ${b.depart}<br>
         ${t('to')} : ${b.arrivee}
         ${b.rating ? `<br>⭐ ${b.rating}/5` : ''}
       </div>
-      ${kind === 'upcoming' ? `<button class="course-link" data-course-id="${b.id}">${t('courseLinkBtn')}</button>` : ''}
+      ${needsAccept ? `<button class="accept-btn" data-accept-id="${b.id}">${t('acceptBtn')}</button>` : ''}
+      ${(kind === 'upcoming' && !needsAccept) ? `<button class="course-link" data-course-id="${b.id}">${t('courseLinkBtn')}</button>` : ''}
+      ${docLinksHTML(b)}
+      ${canFinish ? `<div style="margin-top:8px;"><button class="link-inline" data-finish-id="${b.id}">${t('markCompleted')}</button></div>` : ''}
       <div class="del" data-id="${b.id}" style="margin-top:8px;">${t('delete')}</div>
     </div>`;
+  };
+
+  const ar = state.acceptResult;
+  const acceptPanel = ar ? `
+    <div class="accept-result">
+      <div class="accept-result-title">✔ ${t('acceptDone')} — ${t('acceptOrderNo')} ${ar.orderNo}</div>
+      <div class="accept-result-line">${ar.email ? t('acceptEmailSent') + ' ' + ar.email : t('acceptNoEmail')}</div>
+      <a class="primary-btn" style="display:block;text-align:center;text-decoration:none;margin-top:12px;" href="${ar.waUrl}" target="_blank">${t('acceptWhatsappBtn')}</a>
+      <button class="link-btn" id="acceptDismissBtn">${t('acceptDismiss')}</button>
+    </div>` : '';
 
   const list = tab === 'upcoming' ? upcomingList : completedList;
   const panelHTML = list.length ? list.map(b => rowHTML(b, tab)).join('') : `<div class="empty-state">${t('noBooking')}</div>`;
 
   return `
+    ${acceptPanel}
     <div class="tabs" id="driverTabs">
       <button class="tab-btn ${tab==='upcoming'?'active':''}" data-tab="upcoming">${iconClock('sub-tab-icon')}${t('tabUpcoming')} <span class="count">(${upcomingList.length})</span></button>
       <button class="tab-btn ${tab==='completed'?'active':''}" data-tab="completed">${iconCheckCircle('sub-tab-icon')}${t('tabCompleted')} <span class="count">(${completedList.length})</span></button>
@@ -2928,6 +3328,18 @@ function renderDriverInfoPanel(){
     <label>${t('profileSiretLabel')}</label>
     <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><input type="text" id="pf_siret" value="${escAttr(p.siret)}"></div>
 
+    <label>${t('profileLegalFormLabel')}</label>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3"/></svg><input type="text" id="pf_legalForm" value="${escAttr(p.legalForm)}"></div>
+
+    <label>${t('profileVtcRegistryLabel')}</label>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><input type="text" id="pf_vtcRegistry" value="${escAttr(p.vtcRegistry)}"></div>
+
+    <label>${t('profileVtcCardLabel')}</label>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><input type="text" id="pf_vtcCard" value="${escAttr(p.vtcCard)}"></div>
+
+    <label>${t('profileVatNumberLabel')}</label>
+    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg><input type="text" id="pf_vatNumber" value="${escAttr(p.vatNumber)}"></div>
+
     <label>${t('profileAddressLabel')}</label>
     <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/></svg><input type="text" id="pf_address" value="${escAttr(p.address)}"></div>
 
@@ -2947,6 +3359,13 @@ function renderDriverInfoPanel(){
         <input type="text" id="pf_vehiclePlate" value="${escAttr(p.vehiclePlate)}">
       </div>
     </div>
+
+    <label>${t('profileVatRegimeLabel')}</label>
+    <select id="pf_vatRegime">
+      <option value="vat" ${p.vatRegime !== 'franchise' ? 'selected' : ''}>${t('vatRegimeVat')}</option>
+      <option value="franchise" ${p.vatRegime === 'franchise' ? 'selected' : ''}>${t('vatRegimeFranchise')}</option>
+    </select>
+    <div style="font-size:11.5px;color:var(--ink-dim);margin-top:6px;line-height:1.5;">${t('vatRegimeHint')}</div>
 
     <button class="primary-btn" id="profileSaveBtn">${t('profileSaveBtn')}</button>
     <div class="profile-save-status" id="profileSaveStatus"></div>
@@ -3026,6 +3445,26 @@ function renderDriver(){
       btn.onclick = () => { state.driverCourseId = btn.dataset.courseId; state.driverCourseTab = 'tracking'; state.view = 'driver-course'; render(); };
     });
 
+    app.querySelectorAll('[data-accept-id]').forEach(btn => {
+      btn.onclick = async () => {
+        btn.disabled = true; btn.textContent = t('accepting');
+        const ok = await acceptBooking(btn.dataset.acceptId);
+        if(ok) state.driverTab = 'upcoming';
+        render();
+      };
+    });
+    app.querySelectorAll('[data-finish-id]').forEach(btn => {
+      btn.onclick = async () => {
+        if(!confirm(t('confirmFinish'))) return;
+        const b = state.bookings.find(x => x.id === btn.dataset.finishId);
+        if(b){ const ok = await completeBooking(b); if(!ok) alert(t('acceptError')); }
+        render();
+      };
+    });
+    const dismissBtn = document.getElementById('acceptDismissBtn');
+    if(dismissBtn) dismissBtn.onclick = () => { state.acceptResult = null; render(); };
+    bindDocButtons(app);
+
     app.querySelectorAll('.del').forEach(el => {
       el.onclick = async () => {
         if(!confirm(t('confirmDelete'))) return;
@@ -3045,6 +3484,11 @@ function renderDriver(){
         name: document.getElementById('pf_name').value.trim(),
         company: document.getElementById('pf_company').value.trim(),
         siret: document.getElementById('pf_siret').value.trim(),
+        legalForm: document.getElementById('pf_legalForm').value.trim(),
+        vtcRegistry: document.getElementById('pf_vtcRegistry').value.trim(),
+        vtcCard: document.getElementById('pf_vtcCard').value.trim(),
+        vatNumber: document.getElementById('pf_vatNumber').value.trim(),
+        vatRegime: document.getElementById('pf_vatRegime').value,
         address: document.getElementById('pf_address').value.trim(),
         phone: document.getElementById('pf_phone').value.trim(),
         email: document.getElementById('pf_email').value.trim(),

@@ -382,7 +382,13 @@
 
   .sub-tab-icon{width:14px;height:14px;vertical-align:-2px;margin-right:3px;}
 
-  .profile-photo-row{display:flex;gap:14px;margin-bottom:6px;}
+  .profile-photo-row{display:flex;gap:18px;margin-bottom:6px;flex-wrap:wrap;}
+  .photo-slot{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .profile-photo-row .driver-photo,.profile-photo-row .vehicle-photo{width:92px;height:92px;font-size:34px;}
+  .photo-actions{display:flex;gap:10px;align-items:center;font-size:12.5px;}
+  .photo-actions input[type=file]{display:none;}
+  .photo-actions label{margin:0;cursor:pointer;text-decoration:underline;font-weight:600;color:var(--ink);}
+  .photo-actions button{background:none;border:0;padding:0;font:inherit;color:var(--danger);text-decoration:underline;cursor:pointer;}
   .profile-save-status{font-size:12.5px;color:var(--ink-dim);margin-top:10px;min-height:14px;text-align:center;}
 
   .help-item{border-bottom:1px dashed var(--line);padding:14px 0;}
@@ -580,22 +586,11 @@
 <div id="app"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZRtEJXHG3LGG2kRULwtLkfi7MKpdnxYahlaEW9G73JaLAYLkZPAbp1alt-CIxAGoX/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJRZWtkNcAklVaHpH2sBwkx5p7y0iCBrkyiSqPpAdgTf7-T3dWmkOy4MvIuwbFcl4S/exec';
 // Clé API HERE (Platform.here.com > Projects > votre projet > REST API key)
 const HERE_API_KEY = 'lDqm6cc8GY7_EUpNPhmn9qDIKhbFD1_IYy91h1Q87nk';
-const DRIVER_WHATSAPP = '33695567192';
-// Collez ici l'URL d'une photo de vous et de votre véhicule (hébergées n'importe où : Google Drive en partage public, Imgur, etc.)
-// Laissez tel quel si vous n'en avez pas encore : une icône par défaut s'affichera.
-const DRIVER_PHOTO_URL = '';
-const VEHICLE_PHOTO_URL = '';
-const DRIVER_DISPLAY_NAME = 'Votre chauffeur';
-const COMPANY_NAME = 'COLLEZ_ICI_NOM_DE_VOTRE_SOCIETE';
-const COMPANY_SIRET = 'COLLEZ_ICI_VOTRE_SIRET';
-const DRIVER_PHONE_DISPLAY = 'COLLEZ_ICI_VOTRE_NUMERO';
-const DRIVER_EMAIL = 'COLLEZ_ICI_VOTRE_EMAIL';
-const VEHICLE_MODEL = 'COLLEZ_ICI_MODELE_VEHICULE';
-const VEHICLE_PLATE = 'COLLEZ_ICI_PLAQUE_IMMATRICULATION';
-const DRIVER_ADDRESS = 'COLLEZ_ICI_VOTRE_ADRESSE';
+// Aucune information personnelle (chauffeur ou client) n'est écrite dans ce fichier :
+// tout est enregistré sur le serveur (script Google) et chargé après coup.
 // (Le mot de passe chauffeur n'est plus dans ce fichier : il est vérifié par le serveur, voir script Google)
 
 const MONTHS = {
@@ -741,8 +736,12 @@ const I18N = {
     menuHelp: 'Aide',
     logoutLabel: 'Se déconnecter',
     confirmLogout: 'Voulez-vous vous déconnecter ?',
-    profilePhotoLabel: 'Photo du chauffeur (lien)',
-    profileVehiclePhotoLabel: 'Photo du véhicule (lien)',
+    profilePhotoLabel: 'Photo du chauffeur',
+    profileVehiclePhotoLabel: 'Photo du véhicule',
+    choosePhoto: 'Choisir une photo',
+    removePhoto: 'Supprimer',
+    photoSaved: 'Photo enregistrée ✓',
+    photoError: "Impossible d'utiliser cette image. Essayez une autre photo (JPG ou PNG).",
     profileNameLabel: 'Nom et prénom',
     profileCompanyLabel: 'Nom de société',
     profileSiretLabel: 'Numéro SIRET',
@@ -1016,8 +1015,12 @@ const I18N = {
     menuHelp: 'Help',
     logoutLabel: 'Log out',
     confirmLogout: 'Do you want to log out?',
-    profilePhotoLabel: 'Driver photo (link)',
-    profileVehiclePhotoLabel: 'Vehicle photo (link)',
+    profilePhotoLabel: 'Driver photo',
+    profileVehiclePhotoLabel: 'Vehicle photo',
+    choosePhoto: 'Choose a photo',
+    removePhoto: 'Remove',
+    photoSaved: 'Photo saved ✓',
+    photoError: 'Unable to use this image. Try another photo (JPG or PNG).',
     profileNameLabel: 'Full name',
     profileCompanyLabel: 'Company name',
     profileSiretLabel: 'SIRET number',
@@ -1345,9 +1348,11 @@ function bookingPrefill(){
   }
   return out;
 }
+// Numéro WhatsApp du chauffeur (format international, chiffres seuls), issu du profil enregistré sur le serveur
+function waNumber(){ return toIntlPhone(driverProfile().phone); }
 function driverPhoneForCall(){
   const p = driverProfile().phone;
-  return (p && !String(p).includes('COLLEZ_ICI')) ? p : '+' + DRIVER_WHATSAPP;
+  return p || '';
 }
 
 
@@ -2347,7 +2352,7 @@ function renderBookingOverlay(){
         (name ? `${T.receiptName} : ${name}%0A` : '') +
         `${T.waDate} : ${state.tripDate}%0A${T.waTime} : ${time}%0A${T.waDepart} : ${depart}%0A${T.waArrivee} : ${arrivee}%0A${T.waPhone} : ${phone}` +
         (price ? `%0A${T.waEstimate} : ≈ ${price} €` : '');
-      booking.waHref = `https://wa.me/${DRIVER_WHATSAPP}?text=${msg}`;
+      booking.waHref = `https://wa.me/${waNumber()}?text=${msg}`;
       state.lastBooking = booking;
       state.bookingStep = 3;
       state.tripArrivee = ''; state.tripDepart = ''; state.tripKm = ''; state.tripDtCustomized = false;
@@ -2386,21 +2391,21 @@ function profileFrom(p){
   p = p || {};
   const v = (x) => (x && !String(x).includes('COLLEZ_ICI')) ? x : '';
   return {
-    photo: v(p.photo || DRIVER_PHOTO_URL),
-    vehiclePhoto: v(p.vehiclePhoto || VEHICLE_PHOTO_URL),
-    name: v(p.name || DRIVER_DISPLAY_NAME),
-    company: v(p.company || COMPANY_NAME),
+    photo: v(p.photo),
+    vehiclePhoto: v(p.vehiclePhoto),
+    name: v(p.name),
+    company: v(p.company),
     legalForm: v(p.legalForm),
-    siret: v(p.siret || COMPANY_SIRET),
+    siret: v(p.siret),
     vatNumber: v(p.vatNumber),
     vtcRegistry: v(p.vtcRegistry),
     vtcCard: v(p.vtcCard),
     vatRegime: p.vatRegime === 'franchise' ? 'franchise' : 'vat',
-    address: v(p.address || DRIVER_ADDRESS),
-    phone: v(p.phone || DRIVER_PHONE_DISPLAY),
-    email: v(p.email || DRIVER_EMAIL),
-    vehicleModel: v(p.vehicleModel || VEHICLE_MODEL),
-    vehiclePlate: v(p.vehiclePlate || VEHICLE_PLATE)
+    address: v(p.address),
+    phone: v(p.phone),
+    email: v(p.email),
+    vehicleModel: v(p.vehicleModel),
+    vehiclePlate: v(p.vehiclePlate)
   };
 }
 // Fusionne le profil enregistré avec les valeurs par défaut du fichier
@@ -2417,13 +2422,13 @@ async function loadDriverProfile(){
 function driverPhotoHTML(){
   const p = driverProfile();
   return p.photo
-    ? `<img class="driver-photo" src="${p.photo}" alt="${p.name}">`
+    ? `<img class="driver-photo" src="${escAttr(p.photo)}" alt="${escAttr(p.name)}" referrerpolicy="no-referrer">`
     : `<div class="driver-photo">🧑‍✈️</div>`;
 }
 function vehiclePhotoHTML(){
   const p = driverProfile();
   return p.vehiclePhoto
-    ? `<img class="vehicle-photo" src="${p.vehiclePhoto}" alt="Véhicule">`
+    ? `<img class="vehicle-photo" src="${escAttr(p.vehiclePhoto)}" alt="Véhicule" referrerpolicy="no-referrer">`
     : `<div class="vehicle-photo">🚘</div>`;
 }
 
@@ -2573,7 +2578,7 @@ function rideDetailsHTML(booking, completed){
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
-      <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
+      <a href="https://wa.me/${waNumber()}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
       <a href="tel:${driverPhoneForCall()}" class="ghost-btn" style="justify-content:center;display:flex;">📞 ${t('callClient')}</a>
     </div>
     ${clientDocsHTML(booking)}
@@ -2612,7 +2617,7 @@ function renderTrack(){
             <div><div class="nm">${p.name || t('trackDriverSub')}</div><div class="sub">${[p.vehicleModel, p.vehiclePlate].filter(Boolean).join(' — ')}</div></div>
           </div>
           <div class="map-quick-actions" style="grid-template-columns:repeat(2,1fr);margin-bottom:0;">
-            <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank"><span style="font-size:17px;">💬</span>WhatsApp</a>
+            <a href="https://wa.me/${waNumber()}" target="_blank"><span style="font-size:17px;">💬</span>WhatsApp</a>
             <a href="tel:${driverPhoneForCall()}"><span style="font-size:17px;">📞</span>${t('callClient')}</a>
           </div>
         </div>
@@ -2847,7 +2852,7 @@ function clientHelpPanel(){
     <div class="card" style="margin-top:16px;">
       <div class="section-title">${t('helpContactTitle')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <a href="https://wa.me/${DRIVER_WHATSAPP}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
+        <a href="https://wa.me/${waNumber()}" target="_blank" class="ghost-btn" style="justify-content:center;display:flex;">💬 WhatsApp</a>
         <a href="tel:${driverPhoneForCall()}" class="ghost-btn" style="justify-content:center;display:flex;">📞 ${t('callClient')}</a>
       </div>
     </div>`;
@@ -3306,18 +3311,72 @@ function renderDriverReservationsPanel(){
   `;
 }
 
+// Redimensionne et recadre une photo (carré) dans le navigateur, puis la compresse pour tenir dans une cellule de la feuille
+function resizePhoto(file, size){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      const g = c.getContext('2d');
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      g.fillStyle = '#fff'; g.fillRect(0, 0, size, size);
+      g.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      let q = 0.85, out = c.toDataURL('image/jpeg', q);
+      while(out.length > 30000 && q > 0.3){ q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+      out.length > 30000 ? reject(new Error('too_big')) : resolve(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad_image')); };
+    img.src = url;
+  });
+}
+function bindPhotoInputs(){
+  const statusEl = document.getElementById('photoStatus');
+  const save = async (key, value) => {
+    if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('profileNotConfigured'); return; }
+    statusEl.textContent = t('profileSaving');
+    state.driverProfileData = Object.assign({}, state.driverProfileData || {}, { [key]: value });
+    await postToSheet({ action: 'updatePhotos', [key]: value });
+    statusEl.textContent = t('photoSaved');
+    state.driverSection = 'infos'; render();
+  };
+  [['photo', 'pf_photoFile', 'pf_photoDel', 360], ['vehiclePhoto', 'pf_vehiclePhotoFile', 'pf_vehiclePhotoDel', 420]].forEach(([key, fileId, delId, size]) => {
+    const input = document.getElementById(fileId);
+    if(input) input.onchange = async () => {
+      const f = input.files && input.files[0];
+      if(!f) return;
+      try{ await save(key, await resizePhoto(f, size)); }
+      catch(e){ statusEl.textContent = t('photoError'); }
+    };
+    const del = document.getElementById(delId);
+    if(del) del.onclick = () => save(key, '');
+  });
+}
+
 function renderDriverInfoPanel(){
   const p = driverProfile();
   return `
     <div class="profile-photo-row">
-      ${driverPhotoHTML()}
-      ${vehiclePhotoHTML()}
+      <div class="photo-slot">
+        ${driverPhotoHTML()}
+        <div class="photo-actions">
+          <label for="pf_photoFile">${t('choosePhoto')}</label><input type="file" id="pf_photoFile" accept="image/*">
+          ${p.photo ? `<button type="button" id="pf_photoDel">${t('removePhoto')}</button>` : ''}
+        </div>
+        <div class="sub" style="font-size:11.5px;color:var(--ink-dim);">${t('profilePhotoLabel')}</div>
+      </div>
+      <div class="photo-slot">
+        ${vehiclePhotoHTML()}
+        <div class="photo-actions">
+          <label for="pf_vehiclePhotoFile">${t('choosePhoto')}</label><input type="file" id="pf_vehiclePhotoFile" accept="image/*">
+          ${p.vehiclePhoto ? `<button type="button" id="pf_vehiclePhotoDel">${t('removePhoto')}</button>` : ''}
+        </div>
+        <div class="sub" style="font-size:11.5px;color:var(--ink-dim);">${t('profileVehiclePhotoLabel')}</div>
+      </div>
     </div>
-    <label>${t('profilePhotoLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l5-4 4 3 3-2 4 3"/></svg><input type="text" id="pf_photo" value="${escAttr(p.photo)}"></div>
-
-    <label>${t('profileVehiclePhotoLabel')}</label>
-    <div class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l5-4 4 3 3-2 4 3"/></svg><input type="text" id="pf_vehiclePhoto" value="${escAttr(p.vehiclePhoto)}"></div>
+    <div id="photoStatus" style="font-size:12.5px;color:var(--ink-dim);min-height:16px;margin-bottom:10px;"></div>
 
     <label>${t('profileNameLabel')}</label>
     <div class="field">${iconUser()}<input type="text" id="pf_name" value="${escAttr(p.name)}"></div>
@@ -3476,11 +3535,10 @@ function renderDriver(){
   }
 
   if(section === 'infos'){
+    bindPhotoInputs();
     document.getElementById('profileSaveBtn').onclick = async () => {
       const statusEl = document.getElementById('profileSaveStatus');
       const profile = {
-        photo: document.getElementById('pf_photo').value.trim(),
-        vehiclePhoto: document.getElementById('pf_vehiclePhoto').value.trim(),
         name: document.getElementById('pf_name').value.trim(),
         company: document.getElementById('pf_company').value.trim(),
         siret: document.getElementById('pf_siret').value.trim(),
@@ -3497,7 +3555,8 @@ function renderDriver(){
       };
       if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('profileNotConfigured'); return; }
       statusEl.textContent = t('profileSaving');
-      state.driverProfileData = profile;
+      const prev = state.driverProfileData || {};
+      state.driverProfileData = Object.assign({}, profile, { photo: prev.photo || '', vehiclePhoto: prev.vehiclePhoto || '' }); // les photos sont enregistrées à part
       await postToSheet({ action: 'updateProfile', profile });
       statusEl.textContent = t('profileSaved');
     };

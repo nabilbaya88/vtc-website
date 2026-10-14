@@ -383,6 +383,12 @@
   .sub-tab-icon{width:14px;height:14px;vertical-align:-2px;margin-right:3px;}
 
   .profile-photo-row{display:flex;gap:18px;margin-bottom:6px;flex-wrap:wrap;}
+  .channel-choice{display:flex;gap:10px;margin:4px 0 14px;}
+  .channel-choice label{flex:1;margin:0;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 10px;border:2.5px solid var(--ink);border-radius:var(--radius-md);cursor:pointer;font-weight:700;font-size:13.5px;background:#fff;}
+  .channel-choice input{position:absolute;opacity:0;pointer-events:none;}
+  .channel-choice label:has(input:checked){background:var(--ink);color:var(--yellow,#f5c518);}
+  .channel-choice label:has(input:focus-visible){outline:3px solid var(--yellow,#f5c518);outline-offset:2px;}
+  input[readonly]{opacity:.75;cursor:not-allowed;}
   .photo-slot{display:flex;flex-direction:column;align-items:center;gap:8px;}
   .profile-photo-row .driver-photo,.profile-photo-row .vehicle-photo{width:92px;height:92px;font-size:34px;}
   .photo-actions{display:flex;gap:10px;align-items:center;font-size:12.5px;}
@@ -586,7 +592,7 @@
 <div id="app"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJRZWtkNcAklVaHpH2sBwkx5p7y0iCBrkyiSqPpAdgTf7-T3dWmkOy4MvIuwbFcl4S/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyW6AxVnUEitBT344IeaB1Xj5TgMHPIAzk43KqC0oXZaPD8oTY8tyutC-R9a_65rJEc/exec';
 // Clé API HERE (Platform.here.com > Projects > votre projet > REST API key)
 const HERE_API_KEY = 'lDqm6cc8GY7_EUpNPhmn9qDIKhbFD1_IYy91h1Q87nk';
 // Aucune information personnelle (chauffeur ou client) n'est écrite dans ce fichier :
@@ -617,7 +623,16 @@ const I18N = {
     trackSearchBtn: 'Rechercher',
     trackSearching: 'Recherche en cours…',
     trackNoResults: 'Aucune réservation trouvée avec ce numéro.',
-    sendCodeBtn: 'Recevoir mon code par e-mail',
+    sendCodeBtn: 'Recevoir mon code',
+    emailRequired: "L'adresse e-mail est obligatoire.",
+    emailInvalid: "Adresse e-mail invalide.",
+    errEmailTaken: "Cette adresse e-mail est déjà utilisée par un autre client. Utilisez une autre adresse.",
+    errPhoneEmailLocked: "Ce numéro est déjà enregistré avec une autre adresse e-mail, qui ne peut pas être modifiée. Connectez-vous à votre espace client pour réserver avec votre adresse d'origine.",
+    emailFixedHint: "Obligatoire. Cette adresse sera liée à votre numéro et ne pourra plus être modifiée.",
+    channelLabel: 'Recevoir mon code par',
+    channelEmail: 'E-mail',
+    channelWhatsapp: 'WhatsApp',
+    codeSentIntroWa: "Saisissez le code à 6 chiffres reçu sur WhatsApp, sur le numéro de votre réservation. Il est valable 10 minutes.",
     codeSentIntro: "Saisissez le code à 6 chiffres envoyé à l'adresse e-mail de votre réservation (pensez à vérifier vos courriers indésirables). Il est valable 10 minutes.",
     codeLabel: 'Code de connexion',
     codeLoginBtn: 'Se connecter',
@@ -708,7 +723,7 @@ const I18N = {
     vatRegimeFranchise: "Franchise en base (TVA non applicable, art. 293 B du CGI)",
     vatRegimeHint: "À vérifier avec votre comptable : ces informations figurent sur vos bons de commande et vos factures.",
     clientLoginTitle: "Espace client",
-    clientLoginIntro: "Entrez le numéro de téléphone utilisé pour vos réservations. Nous vous enverrons un code de connexion par e-mail.",
+    clientLoginIntro: "Entrez le numéro de téléphone utilisé pour vos réservations. Nous vous enverrons un code de connexion.",
     clientLoginBtn: "Se connecter",
     clientFirstNameLabel: "Prénom",
     clientLastNameLabel: "Nom",
@@ -799,7 +814,7 @@ const I18N = {
     namePlaceholder: 'Jean Dupont',
     phoneLabel: 'Numéro de téléphone',
     phonePlaceholder: '06 12 34 56 78',
-    emailLabel: 'E-mail (pour recevoir le bon de commande)',
+    emailLabel: 'E-mail (obligatoire, pour recevoir le bon de commande)',
     emailPlaceholder: 'vous@exemple.com',
     emailLabelShort: 'E-mail',
     emailRequiredAlert: 'Merci de renseigner un e-mail pour recevoir le bon de commande.',
@@ -896,7 +911,16 @@ const I18N = {
     trackSearchBtn: 'Search',
     trackSearching: 'Searching…',
     trackNoResults: 'No booking found with this number.',
-    sendCodeBtn: 'Email me a login code',
+    sendCodeBtn: 'Send me a code',
+    emailRequired: 'Email address is required.',
+    emailInvalid: 'Invalid email address.',
+    errEmailTaken: 'This email address is already used by another customer. Please use a different address.',
+    errPhoneEmailLocked: 'This number is already registered with a different email address, which cannot be changed. Sign in to your client area to book with your original address.',
+    emailFixedHint: 'Required. This address will be linked to your number and cannot be changed later.',
+    channelLabel: 'Send my code via',
+    channelEmail: 'Email',
+    channelWhatsapp: 'WhatsApp',
+    codeSentIntroWa: 'Enter the 6-digit code received on WhatsApp, on the number of your booking. It is valid for 10 minutes.',
     codeSentIntro: 'Enter the 6-digit code sent to the email address used for your booking (check your spam folder). It is valid for 10 minutes.',
     codeLabel: 'Login code',
     codeLoginBtn: 'Sign in',
@@ -987,7 +1011,7 @@ const I18N = {
     vatRegimeFranchise: "VAT exemption (not applicable, art. 293 B CGI)",
     vatRegimeHint: "Check with your accountant: these details appear on your order forms and invoices (issued in French).",
     clientLoginTitle: "Client area",
-    clientLoginIntro: "Enter the phone number used for your bookings. We will email you a login code.",
+    clientLoginIntro: "Enter the phone number used for your bookings. We will send you a login code.",
     clientLoginBtn: "Log in",
     clientFirstNameLabel: "First name",
     clientLastNameLabel: "Last name",
@@ -1078,7 +1102,7 @@ const I18N = {
     namePlaceholder: 'John Smith',
     phoneLabel: 'Phone number',
     phonePlaceholder: '+44 7700 900000',
-    emailLabel: 'Email (to receive the order confirmation)',
+    emailLabel: 'Email (required, to receive the order confirmation)',
     emailPlaceholder: 'you@example.com',
     emailLabelShort: 'Email',
     emailRequiredAlert: 'Please enter an email address to receive the order confirmation.',
@@ -1320,12 +1344,24 @@ function clientBookings(){
   const key = normPhone(state.session.phone);
   return state.bookings.filter(b => normPhone(b.phone) === key);
 }
+async function loadConfig(){
+  if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')) return;
+  try{
+    const c = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=config`);
+    state.waLogin = !!(c && c.whatsapp);
+  }catch(e){ state.waLogin = false; }
+}
 async function loadClientProfile(){
   if(APPS_SCRIPT_URL.includes('COLLEZ_ICI') || !state.session || state.session.role !== 'client') return;
   try{
     const saved = await apiGet({ type: 'clientProfile', phone: state.session.phone });
     if(saved && typeof saved === 'object' && !Array.isArray(saved)) state.clientProfileData = cleanObj(saved);
   }catch(e){}
+}
+// Adresse e-mail d'origine du client (première réservation) : elle ne change jamais
+function canonicalEmail(){
+  const mine = clientBookings().filter(b => b.email).sort((a,b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+  return mine.length ? mine[0].email : '';
 }
 function clientProfileValues(){
   const p = state.clientProfileData || {};
@@ -1334,7 +1370,7 @@ function clientProfileValues(){
   return {
     firstName: p.firstName ?? (parts[0] || ''),
     lastName: p.lastName ?? parts.slice(1).join(' '),
-    email: p.email ?? (latest.email || ''),
+    email: canonicalEmail() || p.email || latest.email || '',
     address: p.address ?? '',
     phone: state.session ? state.session.phone : ''
   };
@@ -1345,6 +1381,7 @@ function bookingPrefill(){
     const v = clientProfileValues();
     out.name = [v.firstName, v.lastName].filter(Boolean).join(' ');
     out.phone = v.phone; out.email = v.email;
+    out.locked = true;      // numéro et e-mail du compte non modifiables
   }
   return out;
 }
@@ -2124,14 +2161,15 @@ function renderBookingOverlay(){
         <label>${t('phoneLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
-          <input type="tel" id="f_phone" placeholder="${t('phonePlaceholder')}" value="${escAttr(bf.phone)}">
+          <input type="tel" id="f_phone" placeholder="${t('phonePlaceholder')}" value="${escAttr(bf.phone)}" ${bf.locked ? 'readonly' : ''}>
         </div>
 
         <label>${t('emailLabel')}</label>
         <div class="field">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-          <input type="email" id="f_email" placeholder="${t('emailPlaceholder')}" value="${escAttr(bf.email)}">
+          <input type="email" id="f_email" required autocomplete="email" placeholder="${t('emailPlaceholder')}" value="${escAttr(bf.email)}" ${(bf.locked && bf.email) ? 'readonly' : ''}>
         </div>
+        <div style="font-size:11.5px;color:var(--ink-dim);margin-top:-6px;">${t('emailFixedHint')}</div>
       </div>`;
   } else if(step === 3){
     headerTitle = t('confirmedTitle');
@@ -2337,10 +2375,20 @@ function renderBookingOverlay(){
       const arrivee = state.tripArrivee;
       const km = state.tripKm || (kmFallback ? kmFallback.value : '');
       if(!phone || !depart || !arrivee){ alert(t('fillAlert')); return; }
+      if(!email){ alert(t('emailRequired')); return; }
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)){ alert(t('emailInvalid')); return; }
+      // Un numéro = une adresse e-mail, définitivement ; une adresse = un seul client
+      if(!APPS_SCRIPT_URL.includes('COLLEZ_ICI')){
+        const submitBtn = document.getElementById('submitBtn'); submitBtn.disabled = true;
+        const chk = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=checkIdentity&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}`);
+        submitBtn.disabled = false;
+        if(!chk){ alert(t('networkError')); return; }
+        if(chk.error){ alert(chk.error === 'email_taken' ? t('errEmailTaken') : chk.error === 'phone_email_locked' ? t('errPhoneEmailLocked') : chk.error === 'invalid' ? t('emailInvalid') : t('networkError')); return; }
+      }
       const price = estimatePrice(km, null);
       const booking = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-        date: state.tripDate, time, name: name || null, phone, email: email || null, depart, arrivee,
+        date: state.tripDate, time, name: name || null, phone, email: email.toLowerCase(), depart, arrivee,
         km: km || null, min: null, price: price || null,
         createdAt: new Date().toISOString()
       };
@@ -2702,9 +2750,15 @@ function renderClientLogin(){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
           <input type="tel" id="loginPhone" placeholder="06 12 34 56 78" autocomplete="tel" value="${escAttr(state.loginPhone || '')}">
         </div>
+        ${state.waLogin ? `
+        <label>${t('channelLabel')}</label>
+        <div class="channel-choice" role="radiogroup">
+          <label><input type="radio" name="loginChannel" value="email" ${state.loginChannel !== 'whatsapp' ? 'checked' : ''}>✉️ ${t('channelEmail')}</label>
+          <label><input type="radio" name="loginChannel" value="whatsapp" ${state.loginChannel === 'whatsapp' ? 'checked' : ''}>💬 ${t('channelWhatsapp')}</label>
+        </div>` : ''}
         <button class="primary-btn" id="clientLoginBtn">${t('sendCodeBtn')}</button>`;
   const codeHTML = `
-        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${t('codeSentIntro')}</div>
+        <div style="color:var(--ink-dim);font-size:13px;margin-bottom:14px;">${state.loginChannel === 'whatsapp' && state.waLogin ? t('codeSentIntroWa') : t('codeSentIntro')}</div>
         <label>${t('codeLabel')}</label>
         <div class="field">
           <input type="text" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="······" style="letter-spacing:6px;font-size:20px;text-align:center;">
@@ -2736,7 +2790,7 @@ function renderClientLogin(){
   const requestCode = async (phone) => {
     if(APPS_SCRIPT_URL.includes('COLLEZ_ICI')){ statusEl.textContent = t('trackNotConfigured'); return false; }
     state.loginNotice = null; statusEl.textContent = t('trackSearching');
-    const res = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=clientCode&phone=${encodeURIComponent(phone)}`);
+    const res = await fetchViaJsonp(`${APPS_SCRIPT_URL}?type=clientCode&phone=${encodeURIComponent(phone)}&channel=${state.loginChannel === 'whatsapp' && state.waLogin ? 'whatsapp' : 'email'}`);
     if(!res || res.error){ statusEl.textContent = res && res.error === 'invalid_phone' ? t('invalidPhone') : t('networkError'); return false; }
     return true;
   };
@@ -2746,6 +2800,8 @@ function renderClientLogin(){
     const go = async () => {
       const phone = input.value.trim();
       if(!phone) return;
+      const chosen = document.querySelector('input[name="loginChannel"]:checked');
+      state.loginChannel = chosen ? chosen.value : 'email';
       if(await requestCode(phone)){ state.loginPhone = phone; state.loginStep = 'code'; state.loginNotice = 'codeSentNotice'; renderClientLogin(); }
     };
     document.getElementById('clientLoginBtn').onclick = go;
@@ -2828,7 +2884,7 @@ function clientInfoPanel(){
     <div class="field">${icoPhone}<input type="tel" id="cp_phone" value="${escAttr(v.phone)}" readonly></div>
 
     <label>${t('profileEmailLabel')}</label>
-    <div class="field">${icoMail}<input type="email" id="cp_email" value="${escAttr(v.email)}" autocomplete="email"></div>
+    <div class="field">${icoMail}<input type="email" id="cp_email" value="${escAttr(v.email)}" autocomplete="email" readonly></div>
 
     <label>${t('profileAddressLabel')}</label>
     <div class="field">${icoPin}<input type="text" id="cp_address" value="${escAttr(v.address)}" autocomplete="street-address"></div>
@@ -3607,6 +3663,7 @@ checkSecretAccess();
 render();          // affichage immédiat (page d'accueil, ou écran de chargement si connecté)
 loadBookings();    // puis chargement des réservations depuis la feuille
 loadDriverProfile().then(rerenderIfIdle);
+loadConfig().then(() => { if(state.view === 'account' && !state.session) renderClientLogin(); });
 if(state.session && state.session.role === 'client') loadClientProfile().then(rerenderIfIdle);
 </script>
 </body>

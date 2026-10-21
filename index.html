@@ -1508,12 +1508,15 @@ function buildCalendar(container){
   });
 }
 
+// Tarif : 5 € de prise en charge + le plus élevé des deux : 1 € par km ou 0,90 € par minute
+const FARE_BASE = 5, FARE_PER_KM = 1, FARE_PER_MIN = 0.9;
 function estimatePrice(km, min){
-  const base = 5;
-  let distanceKm = km ? parseFloat(km) : null;
-  if(!distanceKm && min){ distanceKm = (parseFloat(min)/60) * 30; }
-  if(!distanceKm || isNaN(distanceKm)) return null;
-  return (base + distanceKm * 1.5).toFixed(0);
+  const k = parseFloat(km), m = parseFloat(min);
+  const byKm = (k > 0) ? k * FARE_PER_KM : 0;
+  const byMin = (m > 0) ? m * FARE_PER_MIN : 0;
+  const variable = Math.max(byKm, byMin);
+  if(!(variable > 0)) return null;
+  return (Math.round((FARE_BASE + variable) * 100) / 100).toFixed(2);   // au centime près, sans arrondi à l'euro
 }
 
 // Centre Paris/Île-de-France utilisé pour prioriser les résultats de recherche (lat,lng — format HERE)
@@ -2137,7 +2140,7 @@ function renderBookingOverlay(){
 
         <div class="estimate" id="step1Estimate" style="display:${state.tripKm ? 'block' : 'none'};">
           ${t('estimateLabel')}
-          <span class="price" id="step1Price">${state.tripKm ? '≈ ' + estimatePrice(state.tripKm, null) + ' €' : '— €'}</span>
+          <span class="price" id="step1Price">${state.tripKm ? '≈ ' + fmtMoney(parseFloat(estimatePrice(state.tripKm, state.tripMin))) : '— €'}</span>
         </div>
 
         <button class="primary-btn" id="searchNextBtn" style="margin-top:16px;">${t('continueBtn')}</button>
@@ -2156,7 +2159,7 @@ function renderBookingOverlay(){
 
         <div class="estimate" style="margin-top:0;margin-bottom:20px;">
           ${t('estimateLabel')}
-          <span class="price" id="step2Price">${state.tripKm ? '≈ ' + estimatePrice(state.tripKm, null) + ' €' : '— €'}</span>
+          <span class="price" id="step2Price">${state.tripKm ? '≈ ' + fmtMoney(parseFloat(estimatePrice(state.tripKm, state.tripMin))) : '— €'}</span>
         </div>
 
         ${!state.tripKm ? `
@@ -2254,8 +2257,8 @@ function renderBookingOverlay(){
     const priceEl = document.getElementById('step1Price');
 
     const updateEstimate = () => {
-      const p = estimatePrice(state.tripKm, null);
-      if(p){ priceEl.textContent = `≈ ${p} €`; estimateBox.style.display = 'block'; }
+      const p = estimatePrice(state.tripKm, state.tripMin);
+      if(p){ priceEl.textContent = `≈ ${fmtMoney(parseFloat(p))}`; estimateBox.style.display = 'block'; }
       else { estimateBox.style.display = 'none'; }
     };
     updateEstimate();
@@ -2267,7 +2270,7 @@ function renderBookingOverlay(){
         const result = (state.tripDepartCoords && state.tripArriveeCoords)
           ? await routeBetweenCoords(state.tripDepartCoords, state.tripArriveeCoords)
           : await calculateRoute(state.tripDepart, state.tripArrivee);
-        state.tripKm = result.km;
+        state.tripKm = result.km; state.tripMin = result.min;
         statusEl.textContent = '';
         updateEstimate();
       }catch(e){ statusEl.textContent = t('routeError'); }
@@ -2370,13 +2373,13 @@ function renderBookingOverlay(){
 
     const updatePrice = () => {
       const km = state.tripKm || (kmFallback ? kmFallback.value : '');
-      const p = estimatePrice(km, null);
-      const text = p ? `≈ ${p} €` : '— €';
+      const p = estimatePrice(km, state.tripMin);
+      const text = p ? `≈ ${fmtMoney(parseFloat(p))}` : '— €';
       if(bbPrice) bbPrice.textContent = text;
       if(step2Price) step2Price.textContent = text;
     };
     updatePrice();
-    if(kmFallback){ kmFallback.oninput = () => { state.tripKm = kmFallback.value; updatePrice(); }; }
+    if(kmFallback){ kmFallback.oninput = () => { state.tripKm = kmFallback.value; state.tripMin = ''; updatePrice(); }; }
 
     document.getElementById('editTripBtn').onclick = () => { state.bookingStep = 1; render(); };
 
@@ -2399,11 +2402,11 @@ function renderBookingOverlay(){
         if(!chk){ alert(t('networkError')); return; }
         if(chk.error){ alert(chk.error === 'email_taken' ? t('errEmailTaken') : chk.error === 'phone_email_locked' ? t('errPhoneEmailLocked') : chk.error === 'invalid' ? t('emailInvalid') : t('networkError')); return; }
       }
-      const price = estimatePrice(km, null);
+      const price = estimatePrice(km, state.tripMin);
       const booking = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
         date: state.tripDate, time, name: name || null, phone, email: email.toLowerCase(), depart, arrivee,
-        km: km || null, min: null, price: price || null,
+        km: km || null, min: state.tripMin || null, price: price || null,
         createdAt: new Date().toISOString()
       };
       state.bookings.push(booking);
@@ -2413,11 +2416,11 @@ function renderBookingOverlay(){
       const msg = `${T.waMsgIntro}%0A` +
         (name ? `${T.receiptName} : ${name}%0A` : '') +
         `${T.waDate} : ${state.tripDate}%0A${T.waTime} : ${time}%0A${T.waDepart} : ${depart}%0A${T.waArrivee} : ${arrivee}%0A${T.waPhone} : ${phone}` +
-        (price ? `%0A${T.waEstimate} : ≈ ${price} €` : '');
+        (price ? `%0A${T.waEstimate} : ≈ ${fmtMoney(parseFloat(price))}` : '');
       booking.waHref = `https://wa.me/${waNumber()}?text=${msg}`;
       state.lastBooking = booking;
       state.bookingStep = 3;
-      state.tripArrivee = ''; state.tripDepart = ''; state.tripKm = ''; state.tripDtCustomized = false;
+      state.tripArrivee = ''; state.tripDepart = ''; state.tripKm = ''; state.tripMin = ''; state.tripDtCustomized = false;
       render();
     };
   }
@@ -2616,7 +2619,7 @@ function rideDetailsHTML(booking, completed){
         <div style="font-family:'Space Grotesk';font-weight:700;font-size:16px;">${booking.date} — ${booking.time}</div>
         <div style="color:var(--ink-dim);font-size:12.5px;margin-top:4px;line-height:1.6;">
           ${t('from')} : ${booking.depart}<br>${t('to')} : ${booking.arrivee}
-          ${booking.price ? `<br>${t('estimateLabel')} : ${booking.price} €` : ''}
+          ${booking.price ? `<br>${t('estimateLabel')} : ${fmtMoney(parseFloat(booking.price))}` : ''}
           <br>🎫 ${booking.id}
         </div>
       </div>
@@ -2858,7 +2861,7 @@ function clientReservationsPanel(mine){
         <span>${b.date} — ${b.time}</span>
         <span style="display:flex;align-items:center;gap:8px;">
           <span class="status-chip ${tab === 'upcoming' ? ((b.status || 'pending') === 'pending' ? 'toconfirm' : 'upcoming') : 'done'}">${tab === 'upcoming' ? ((b.status || 'pending') === 'pending' ? t('statusToConfirm') : t('statusConfirmed')) : t('trackStatusDone')}</span>
-          ${b.price ? b.price + ' €' : ''}
+          ${b.price ? fmtMoney(parseFloat(b.price)) : ''}
         </span>
       </div>
       <div class="detail">
@@ -3185,7 +3188,7 @@ function renderDriverCourse(){
         <div><span>${t('departLabel')}</span>${booking.depart}</div>
         <div><span>${t('arriveeLabel')}</span>${booking.arrivee}</div>
         <div><span>${t('onDate')}</span>${booking.date} · ${booking.time}</div>
-        ${booking.price ? `<div><span>${t('estimateLabel')}</span>${booking.price} €</div>` : ''}
+        ${booking.price ? `<div><span>${t('estimateLabel')}</span>${fmtMoney(parseFloat(booking.price))}</div>` : ''}
         <div><span>${t('trackRefLabel')}</span>${booking.id}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
@@ -3339,7 +3342,7 @@ function renderDriverReservationsPanel(){
         <span>${b.date} — ${b.time}</span>
         <span style="display:flex;align-items:center;gap:8px;">
           <span class="status-chip ${chipClass}">${chipText}</span>
-          ${b.price ? b.price+' €' : ''}
+          ${b.price ? fmtMoney(parseFloat(b.price)) : ''}
         </span>
       </div>
       <div class="detail">

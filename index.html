@@ -647,7 +647,7 @@ const I18N = {
     codeSentNotice: "Si ce numéro correspond à une réservation avec une adresse e-mail, un code vient d'être envoyé.",
     wrongCode: 'Code incorrect ou expiré.',
     invalidPhone: 'Numéro de téléphone invalide.',
-    networkError: 'Connexion impossible. Vérifiez votre réseau et réessayez.',
+    networkError: 'Connexion impossible. Rechargez la page (Ctrl+Maj+R sur ordinateur) puis réessayez. Si cela continue, vérifiez votre réseau ou désactivez votre bloqueur de publicités pour ce site.',
     loginLocked: 'Trop de tentatives. Réessayez dans 10 minutes.',
     driverNotConfigured: "Mot de passe chauffeur non défini dans le script Google (ADMIN_PASSWORD).",
     sessionExpired: 'Votre session a expiré. Veuillez vous reconnecter.',
@@ -935,7 +935,7 @@ const I18N = {
     codeSentNotice: 'If this number matches a booking with an email address, a code has just been sent.',
     wrongCode: 'Incorrect or expired code.',
     invalidPhone: 'Invalid phone number.',
-    networkError: 'Unable to connect. Check your network and try again.',
+    networkError: 'Unable to connect. Reload the page (Ctrl+Shift+R on a computer) and try again. If it persists, check your network or disable your ad blocker for this site.',
     loginLocked: 'Too many attempts. Try again in 10 minutes.',
     driverNotConfigured: 'Driver password not set in the Google script (ADMIN_PASSWORD).',
     sessionExpired: 'Your session has expired. Please sign in again.',
@@ -1418,7 +1418,16 @@ function sessionExpired(){
   render();
 }
 
-function fetchViaJsonp(url){
+// Appel avec une seconde tentative automatique (coupure passagère, réseau lent sur PC / tablette…)
+async function fetchViaJsonp(url, tries = 2){
+  let res = null;
+  for(let i = 0; i < tries && res === null; i++){
+    if(i > 0) await new Promise(r => setTimeout(r, 700));
+    res = await jsonpOnce(url);
+  }
+  return res;
+}
+function jsonpOnce(url){
   return new Promise((resolve) => {
     const cbName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random()*10000);
     const script = document.createElement('script');
@@ -1431,7 +1440,7 @@ function fetchViaJsonp(url){
       script.remove();
       resolve(value);
     };
-    const timer = setTimeout(() => finish(null), 15000); // évite un chargement infini
+    const timer = setTimeout(() => finish(null), 12000); // évite un chargement infini
     window[cbName] = (data) => finish(data);
     script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${cbName}`;
     script.onerror = () => finish(null);
